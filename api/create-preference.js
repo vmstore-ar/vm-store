@@ -19,8 +19,12 @@ export default async function handler(req, res) {
     const preferenceItems = items.map(item => ({
       title: item.name,
       quantity: Number(item.quantity),
-      unit_price: Math.round(Number(item.price) * dollarRate),
-      currency_id: "ARS"
+      unit_price:
+  item.productCurrency === "ARS"
+    ? Math.round(Number(item.price))
+    : Math.round(Number(item.price) * dollarRate),
+
+currency_id: "ARS"
     }));
 
     const response = await fetch(

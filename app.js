@@ -956,36 +956,36 @@ function addToCartFromData(name, price, image) {
 
   let allProducts = [];
 
-Object.values(products).forEach(category => {
-  allProducts = allProducts.concat(category);
-});
+  Object.values(products).forEach(category => {
+    allProducts = allProducts.concat(category);
+  });
 
-const currentProduct =
-  allProducts.find(product => product.name === name);
+  const currentProduct =
+    allProducts.find(product => product.name === name);
 
-if(currentProduct && currentProduct.stock <= 0) {
+  const productCurrency =
+    currentProduct
+      ? currentProduct.productCurrency || currentProduct.originalCurrency || "USD"
+      : "USD";
 
-  showToast("Producto sin stock");
-
-  return;
-}
+  if(currentProduct && currentProduct.stock <= 0) {
+    showToast("Producto sin stock");
+    return;
+  }
 
   const existingProduct =
     cart.find(item => item.name === name);
 
   if (existingProduct) {
-
     existingProduct.quantity++;
-
   } else {
-
     cart.push({
-      name: name,
-      price: price,
+      name,
+      price,
       quantity: 1,
-      image: image
+      image,
+      productCurrency
     });
-
   }
 
   updateCart();
@@ -995,7 +995,6 @@ if(currentProduct && currentProduct.stock <= 0) {
   document
     .getElementById("cartPanel")
     .classList.add("active");
-
 }
 
 function updateCart() {
@@ -1027,7 +1026,7 @@ function updateCart() {
           <div>
             <strong>${item.name}</strong>
 
-            <p>${formatPrice(item.price)} x ${item.quantity}</p>
+            <p>${formatPrice(item.price, item.productCurrency || "USD")} x ${item.quantity}</p>
 
             <div class="quantity-controls">
               <button onclick="decreaseQuantity(${index})">−</button>
@@ -3053,53 +3052,74 @@ function setCurrency(newCurrency) {
 
   localStorage.setItem("currency", currency);
 
-  document
-    .getElementById("usdBtn")
-    .classList.remove("active");
+  const usdBtn =
+    document.getElementById("usdBtn");
 
-  document
-    .getElementById("arsBtn")
-    .classList.remove("active");
+  const arsBtn =
+    document.getElementById("arsBtn");
+
+  if(usdBtn) {
+    usdBtn.classList.remove("active");
+  }
+
+  if(arsBtn) {
+    arsBtn.classList.remove("active");
+  }
 
   if(currency === "USD") {
 
-    document
-      .getElementById("usdBtn")
-      .classList.add("active");
+    if(usdBtn) {
+      usdBtn.classList.add("active");
+    }
 
   } else {
 
-    document
-      .getElementById("arsBtn")
-      .classList.add("active");
+    if(arsBtn) {
+      arsBtn.classList.add("active");
+    }
 
   }
 
-  applyFilters();
+  const page =
+    window.location.pathname.split("/").pop();
 
-  renderFavorites();
+  if(page === "tienda.html") {
 
-  updateCart();
+    currentCategory = "all";
 
-  updateTotal();
+    if(typeof applyFilters === "function") {
+      applyFilters();
+    }
+
+  } else if(page === "iphones.html") {
+
+    currentCategory = "iphones";
+
+    if(typeof renderProducts === "function") {
+      renderProducts("iphones");
+    }
+
+  } else {
+
+    if(typeof renderProducts === "function") {
+      renderProducts(currentCategory || "all");
+    }
+
+  }
+
+  if(typeof renderFavorites === "function") {
+    renderFavorites();
+  }
+
+  if(typeof updateCart === "function") {
+    updateCart();
+  }
+
+  if(typeof updateTotal === "function") {
+    updateTotal();
+  }
 
 }
-
-window.addEventListener("DOMContentLoaded", () => {
-
-  if(currency === "ARS") {
-
-    document
-      .getElementById("arsBtn")
-      .classList.add("active");
-
-    document
-      .getElementById("usdBtn")
-      .classList.remove("active");
-
-  }
-
-});
 
 function updateShopHero(category) {
 
@@ -3137,27 +3157,35 @@ function updateShopHero(category) {
   text.textContent = data[category].text;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", () => {
 
-  const tabs = document.querySelectorAll(".category-tab");
+  const usdBtn =
+    document.getElementById("usdBtn");
 
-  tabs.forEach(tab => {
+  const arsBtn =
+    document.getElementById("arsBtn");
 
-    tab.addEventListener("click", () => {
+  if(currency === "ARS") {
 
-      const category = tab.dataset.category;
+    if(arsBtn) {
+      arsBtn.classList.add("active");
+    }
 
-      tabs.forEach(btn => btn.classList.remove("active"));
+    if(usdBtn) {
+      usdBtn.classList.remove("active");
+    }
 
-      tab.classList.add("active");
+  } else {
 
-      renderProducts(category);
+    if(usdBtn) {
+      usdBtn.classList.add("active");
+    }
 
-      updateShopHero(category);
+    if(arsBtn) {
+      arsBtn.classList.remove("active");
+    }
 
-    });
-
-  });
+  }
 
 });
 
