@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { items } = req.body;
+    const { items, exchangeRate } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({
@@ -14,10 +14,12 @@ export default async function handler(req, res) {
       });
     }
 
+    const dollarRate = Number(exchangeRate) || 1300;
+
     const preferenceItems = items.map(item => ({
       title: item.name,
       quantity: Number(item.quantity),
-      unit_price: Number(item.price),
+      unit_price: Math.round(Number(item.price) * dollarRate),
       currency_id: "ARS"
     }));
 
@@ -32,9 +34,9 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           items: preferenceItems,
           back_urls: {
-            success: "https://TU-DOMINIO.com/success.html",
-            failure: "https://TU-DOMINIO.com/failure.html",
-            pending: "https://TU-DOMINIO.com/pending.html"
+            success: "https://vm-store-azure.vercel.app/home.html",
+            failure: "https://vm-store-azure.vercel.app/home.html",
+            pending: "https://vm-store-azure.vercel.app/home.html"
           },
           auto_return: "approved"
         })
@@ -42,6 +44,13 @@ export default async function handler(req, res) {
     );
 
     const data = await response.json();
+
+    if (!data.init_point) {
+      return res.status(500).json({
+        error: "Mercado Pago no devolvió init_point",
+        details: data
+      });
+    }
 
     return res.status(200).json({
       init_point: data.init_point

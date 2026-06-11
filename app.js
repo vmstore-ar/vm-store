@@ -3651,8 +3651,9 @@ async function payWithMercadoPago() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        items: currentCart
-      })
+  items: currentCart,
+  exchangeRate: exchangeRate
+})
     });
 
     const data = await response.json();
