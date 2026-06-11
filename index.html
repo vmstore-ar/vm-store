@@ -1,1239 +1,172 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <title>VM STORE | Próximamente</title>
 
   <link rel="icon" type="image/png" href="imagenes/logo.png">
 
-  <meta charset="UTF-8" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>VM Store | Tecnología & PC Builder</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
-
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'Exo 2', sans-serif;
+    }
 
-  <link rel="stylesheet" href="style-clean.css">
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top right, rgba(59,130,246,.18), transparent 35%),
+        radial-gradient(circle at bottom left, rgba(255,255,255,.08), transparent 30%),
+        #050505;
+      color:white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:25px;
+    }
 
-  <link
-  rel="stylesheet"
-  href="https://unpkg.com/aos@2.3.1/dist/aos.css"
-/>
+    .launch-box{
+      max-width:720px;
+      width:100%;
+      text-align:center;
+      padding:45px 30px;
+      border-radius:30px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 30px 80px rgba(0,0,0,.45);
+    }
 
+    .launch-logo{
+      width:90px;
+      margin-bottom:22px;
+    }
+
+    h1{
+      font-size:3rem;
+      margin-bottom:14px;
+      letter-spacing:.5px;
+    }
+
+    h2{
+      font-size:1.45rem;
+      color:#cbd5e1;
+      margin-bottom:22px;
+      font-weight:500;
+    }
+
+    p{
+      color:#94a3b8;
+      line-height:1.7;
+      margin-bottom:28px;
+      font-size:1rem;
+    }
+
+    .launch-list{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:14px;
+      margin:30px 0;
+    }
+
+    .launch-item{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:16px;
+      font-weight:600;
+      color:#e5e7eb;
+    }
+
+    .whatsapp-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      margin-top:12px;
+      padding:15px 24px;
+      border-radius:16px;
+      background:#25D366;
+      color:white;
+      text-decoration:none;
+      font-weight:800;
+      transition:.3s;
+    }
+
+    .whatsapp-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 15px 35px rgba(37,211,102,.25);
+    }
+
+    .footer-text{
+      margin-top:25px;
+      font-size:.85rem;
+      color:#64748b;
+    }
+
+    @media(max-width:600px){
+      h1{
+        font-size:2.25rem;
+      }
+
+      .launch-box{
+        padding:35px 22px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- WHATSAPP -->
+  <main class="launch-box">
 
-<a href="https://wa.me/541165937718" class="whatsapp-float" target="_blank">
-  💬
-</a>
-
-<!-- CARRITO -->
-
-<div class="cart-panel" id="cartPanel">
-
-  <div class="cart-header">
-
-    <h3>Carrito</h3>
-
-    <button onclick="toggleCart()">
-      ✕
-    </button>
-
-  </div>
-
-  <div id="cart-items"></div>
-
-  <div class="cart-footer">
-
-    <div class="cart-total">
-
-      <span>Total</span>
-
-      <strong id="cart-total">
-        USD 0
-      </strong>
-
-    </div>
-
-    <button
-  class="checkout-btn"
-  id="checkoutBtn"
-  onclick="finishCartOrder()"
->
-  Finalizar compra
-</button>
-
-    <button
-  class="mp-checkout-btn"
-  onclick="payWithMercadoPago()"
->
-  Pagar con Mercado Pago
-</button>
-
-    <button
-      class="clear-cart-btn"
-      onclick="clearCart()"
+    <img
+      src="imagenes/logo.png"
+      alt="VM STORE"
+      class="launch-logo"
     >
-      Vaciar carrito
-    </button>
 
-  </div>
+    <h1>VM STORE</h1>
 
-</div>
+    <h2>Estamos trabajando en el lanzamiento</h2>
 
-<!-- FAVORITOS PANEL -->
+    <p>
+      Estamos preparando nuestra tienda online para brindarte una experiencia más completa, rápida y segura.
+      Muy pronto vas a poder comprar tecnología premium desde nuestra web.
+    </p>
 
-<div class="favorites-panel" id="favoritesPanel">
-
-  <div class="favorites-header">
-    <h3>Favoritos</h3>
-    <button onclick="toggleFavorites()">✕</button>
-  </div>
-
-  <div id="favorites-panel-items"></div>
-
-</div>
-
-<!-- HEADER -->
-
-<header>
-
-  <div class="container navbar">
-
-    <div class="logo">
-      <img src="imagenes/logo.png" alt="Logo">
-      <span>VM STORE</span>
+    <div class="launch-list">
+      <div class="launch-item">📱 iPhones nuevos y seminuevos</div>
+      <div class="launch-item">🖥️ Componentes de PC</div>
+      <div class="launch-item">🎮 PCs Gamer y Oficina</div>
+      <div class="launch-item">⌨️ Periféricos y accesorios</div>
+      <div class="launch-item">🛠️ Servicio técnico</div>
+      <div class="launch-item">💳 Pagos online</div>
     </div>
 
-    <div class="header-search">
-  <input
-    type="text"
-    id="searchInput"
-    placeholder="Buscar productos..."
-    onkeyup="searchProducts()"
-  >
-</div>
-
-<div class="header-actions">
-
-    <button class="theme-toggle" onclick="toggleTheme()">
-      🌙
-    </button>
-
-
-    <button
-  class="admin-login-btn"
-  id="adminAccessBtn"
-  onclick="handleAdminAccess()"
->
-  🔐 Admin
-</button>
-
-<button
-  class="admin-login-btn"
-  id="openAdminPanelBtn"
-  onclick="openAdminPanel()"
-  style="display:none;"
->
-  ⚙️ Panel
-</button>
-
-    <div class="currency-switch">
-
-  <button
-    class="currency-btn active"
-    id="usdBtn"
-    onclick="setCurrency('USD')"
-  >
-    USD
-  </button>
-
-  <button
-    class="currency-btn"
-    id="arsBtn"
-    onclick="setCurrency('ARS')"
-  >
-    ARS
-  </button>
-
-  <button
-  class="account-btn"
-  id="accountHeaderBtn"
-  onclick="openAccountModal()"
->
-  👤 Mi cuenta
-</button>
-
-<div
-  class="favorites-icon"
-  onclick="toggleFavorites()"
->
-
-  <i data-lucide="heart"></i>
-
-  <span id="favorites-count">0</span>
-
-</div>
-
-<div
-  class="cart-icon futuristic-cart"
-  onclick="toggleCart()"
->
-
-  <i data-lucide="shopping-cart"></i>
-
-  <span id="cart-count">0</span>
-
-</div>
-
-    </div>
-    
-
-    <div class="menu-toggle" id="menuToggle">
-      ☰
-    </div>
-
-  </div>
-
-</header>
-
-<!-- SUB HEADER -->
-
-<nav class="sub-header">
-
-  <div class="sub-header-container">
-
-    <a href="index.html" class="sub-link" data-page="index">Inicio</a>
-
-    <a href="tienda.html" class="sub-link" data-page="tienda">Tienda</a>
-
-    <a href="builder.html" class="sub-link" data-page="builder">Armá tu PC</a>
-
-    <a href="iphones.html" class="sub-link" data-page="iphones">iPhones</a>
-
-    <a href="#contacto" class="sub-link" data-page="contacto">Contacto</a>
-
-  </div>
-
-</nav>
-
-
-
-<!-- HOME HERO PREMIUM -->
-
-<section class="home-hero">
-
-  <div class="container home-hero-content">
-
-    <div class="home-hero-text">
-
-      <span class="home-kicker">VM STORE</span>
-
-      <h1>
-        Tecnología premium para tu setup
-      </h1>
-
-      <p>
-        iPhones nuevos y seminuevos, PC Gamer, componentes,
-        notebooks, accesorios y servicio técnico especializado.
-      </p>
-
-      <div class="home-hero-actions">
-
-        <a href="tienda.html" class="btn btn-primary">
-          Ver tienda
-        </a>
-
-        <a href="builder.html" class="btn home-secondary-btn">
-          Armá tu PC
-        </a>
-
-      </div>
-
-    </div>
-
-    <div class="home-hero-visual">
-
-      <img src="https://images.unsplash.com/photo-1547082299-de196ea013d6?q=80&w=1600&auto=format&fit=crop"
-        alt="Setup gamer"
-      >
-
-      <div class="floating-card card-one">
-        <strong>PC Builder</strong>
-        <span>Armados personalizados</span>
-      </div>
-
-      <div class="floating-card card-two">
-        <strong>iPhones</strong>
-        <span>Nuevos y seminuevos</span>
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- HOME FEATURED CATEGORIES -->
-
-<section class="home-featured">
-
-  <div class="container featured-wrapper">
-
-    <div class="featured-row">
-
-      <a href="tienda.html" class="featured-image-card">
-        <img src="imagenes/slider2.jpg" alt="PC de escritorio y notebooks">
-
-        <div class="featured-image-overlay">
-          <span>PC de Escritorio</span>
-          <h3>& Notebooks</h3>
-        </div>
-      </a>
-
-      <div class="featured-info">
-        <span>Equipos para cada necesidad</span>
-
-        <h2>Computadoras listas para trabajar, estudiar o jugar</h2>
-
-        <p>
-          Encontrá PCs de escritorio, notebooks y equipos armados según tu uso:
-          oficina, estudio, diseño, gaming o rendimiento profesional.
-        </p>
-
-        <a href="tienda.html" class="featured-link">
-          Ver equipos →
-        </a>
-      </div>
-
-    </div>
-
-    <div class="featured-row reverse">
-
-      <a href="tienda.html" class="featured-image-card">
-       <img src="https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=80&w=1600&auto=format&fit=crop" alt="Componentes de PC">
-
-        <div class="featured-image-overlay">
-          <span>Todo para PC</span>
-          <h3>Componentes</h3>
-        </div>
-      </a>
-
-      <div class="featured-info">
-        <span>Hardware y rendimiento</span>
-
-        <h2>Componentes para potenciar tu setup</h2>
-
-        <p>
-          Placas de video, procesadores, memorias RAM, SSD, fuentes, gabinetes
-          y periféricos para actualizar o armar tu PC ideal.
-        </p>
-
-        <a href="tienda.html" class="featured-link">
-          Ver componentes →
-        </a>
-      </div>
-
-    </div>
-
-    <div class="featured-row">
-
-      <a href="iphones.html" class="featured-image-card">
-        <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1600&auto=format&fit=crop" alt="iPhones nuevos y seminuevos">
-
-        <div class="featured-image-overlay">
-          <span>iPhones</span>
-          <h3>Nuevos & Seminuevos</h3>
-        </div>
-      </a>
-
-      <div class="featured-info">
-        <span>Ecosistema Apple</span>
-
-        <h2>iPhones seleccionados, probados y listos para usar</h2>
-
-        <p>
-          Equipos nuevos y seminuevos, accesorios, fundas, cargadores
-          y asesoramiento para elegir el modelo ideal según tu presupuesto.
-        </p>
-
-        <a href="iphones.html" class="featured-link">
-          Ver iPhones →
-        </a>
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- PREMIUM BANNERS -->
-
-<section class="premium-banners">
-
-  <div class="container banners-grid">
-
-    <a href="builder.html" class="premium-banner big-banner">
-
-      <img
-        src="https://images.unsplash.com/photo-1547082299-de196ea013d6?q=80&w=1600&auto=format&fit=crop"
-        alt="Gaming Setup"
-      >
-
-      <div class="banner-overlay">
-
-        <span>VM PERFORMANCE</span>
-
-        <h2>
-          Armá el setup<br>
-          de tus sueños
-        </h2>
-
-        <p>
-          Equipos gamer, rendimiento extremo y componentes premium.
-        </p>
-
-      </div>
-
+    <p>
+      Gracias por tu interés. Próximamente disponible.
+    </p>
+
+    <a
+      href="https://wa.me/541165937718"
+      class="whatsapp-btn"
+      target="_blank"
+    >
+      Consultar por WhatsApp
     </a>
 
-    <div class="small-banners">
-
-      <a href="iphones.html" class="premium-banner small-banner">
-
-        <img
-          src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1600&auto=format&fit=crop"
-          alt="iPhones"
-        >
-
-        <div class="banner-overlay">
-
-          <span>APPLE</span>
-
-          <h2>iPhones Premium</h2>
-
-        </div>
-
-      </a>
-
-      <a href="tienda.html" class="premium-banner small-banner">
-
-        <img
-          src="https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=80&w=1600&auto=format&fit=crop"
-          alt="Componentes"
-        >
-
-        <div class="banner-overlay">
-
-          <span>HARDWARE</span>
-
-          <h2>Todo para PC</h2>
-
-        </div>
-
-      </a>
-
+    <div class="footer-text">
+      © 2026 VM STORE - Tecnología & PC Builder
     </div>
 
-  </div>
-
-</section>
-
-
-
-<!-- HOME CATEGORIES PREMIUM -->
-
-<section class="home-categories">
-
-  <div class="container">
-
-    <div class="section-title">
-
-      <span class="section-kicker">EXPLORÁ VM STORE</span>
-
-      <h2>Categorías principales</h2>
-
-      <p>
-        Accedé rápido a las secciones más importantes de la tienda.
-      </p>
-
-    </div>
-
-    <div class="home-categories-grid">
-
-      <a href="iphones.html" class="home-category-card">
-        <i data-lucide="smartphone"></i>
-        <h3>iPhones</h3>
-        <p>Nuevos, seminuevos y accesorios Apple.</p>
-      </a>
-
-      <a href="tienda.html" class="home-category-card">
-        <i data-lucide="cpu"></i>
-        <h3>Componentes</h3>
-        <p>Hardware, memorias, discos, fuentes y periféricos.</p>
-      </a>
-
-      <a href="tienda.html" class="home-category-card">
-        <i data-lucide="laptop"></i>
-        <h3>Notebooks</h3>
-        <p>Equipos para trabajo, estudio y uso diario.</p>
-      </a>
-
-      <a href="builder.html" class="home-category-card">
-        <i data-lucide="monitor-cog"></i>
-        <h3>PC Builder</h3>
-        <p>Armá tu PC ideal y solicitá presupuesto.</p>
-      </a>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- PRODUCTOS DESTACADOS HOME -->
-
-<section id="destacados" class="home-products" data-aos="fade-up">
-
-  <div class="container">
-
-    <div class="section-title">
-
-      <span class="section-kicker">SELECCIÓN VM STORE</span>
-
-      <h2>Productos destacados</h2>
-
-      <p>
-        Una selección de equipos, iPhones y componentes recomendados.
-      </p>
-
-    </div>
-
-    <div
-      class="products-grid"
-      id="productsContainer"
-    ></div>
-
-    <div class="home-products-action">
-
-      <a href="tienda.html" class="btn btn-primary">
-        Ver tienda completa
-      </a>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- ADMIN PANEL -->
-
-<div class="admin-modal" id="adminModal">
-
-  <div class="admin-modal-content">
-
-    <button
-      class="close-admin-modal"
-      onclick="closeAdminPanel()"
-    >
-      ✕
-    </button>
-
-<section class="admin-panel">
-
-  <div class="container">
-
-    <div class="section-title">
-
-      <h2>Panel Administrador</h2>
-
-      <p>
-        Agregá productos dinámicamente.
-      </p>
-
-    </div>
-
-    <div class="admin-form">
-
-      <input
-        type="text"
-        id="adminName"
-        placeholder="Nombre del producto"
-      >
-
-      <input
-        type="text"
-        id="adminDescription"
-        placeholder="Descripción"
-      >
-
-      <input
-        type="number"
-        id="adminPrice"
-        placeholder="Precio"
-      >
-
-      
-      <input
-  type="file"
-  id="adminImage"
-  accept="image/*"
->
-
-<input
-  type="text"
-  id="adminImageUrl"
-  placeholder="Ruta o URL de imagen. Ej: imagenes/iphone.jpg"
->
-
-<img
-  id="imagePreview"
-  style="
-    width: 100%;
-    max-height: 220px;
-    object-fit: cover;
-    border-radius: 16px;
-    display: none;
-  "
->
-
-      <select id="adminCategory">
-
-  <option value="componentes">
-    Componentes
-  </option>
-
-  <option value="notebooks">
-    Notebooks
-  </option>
-
-  <option value="pcs">
-    PCs Armadas
-  </option>
-
-  <option value="perifericos">
-    Periféricos
-  </option>
-
-  <option value="iphones">
-    iPhones
-  </option>
-
-  <option value="accesorios-apple">
-  Accesorios Apple
-</option>
-
-</select>
-
-<select id="adminSubCategory">
-  <option value="">Sin subcategoría</option>
-
-  <optgroup label="Componentes">
-    <option value="procesadores-amd">Procesadores AMD</option>
-    <option value="procesadores-intel">Procesadores Intel</option>
-    <option value="motherboards-amd">Motherboards AMD</option>
-    <option value="motherboards-intel">Motherboards Intel</option>
-    <option value="memorias-ram">Memorias RAM Desktop</option>
-    <option value="ram-notebook">RAM Notebook</option>
-    <option value="ssd">SSD</option>
-    <option value="hdd">HDD</option>
-    <option value="nvme">NVMe</option>
-    <option value="placas-nvidia">Placas NVIDIA</option>
-    <option value="placas-amd">Placas AMD Radeon</option>
-    <option value="placas-intel">Placas Intel Arc</option>
-    <option value="fuentes">Fuentes</option>
-    <option value="gabinetes">Gabinetes</option>
-    <option value="cooler-cpu">Cooler CPU</option>
-    <option value="water-cooling">Water Cooling</option>
-    <option value="coolers-gabinete">Coolers gabinete</option>
-  </optgroup>
-
-  <optgroup label="Notebooks">
-    <option value="notebooks-oficina">Notebooks oficina</option>
-    <option value="notebooks-gamer">Notebooks gamer</option>
-    <option value="notebooks-estudio">Notebooks estudio</option>
-  </optgroup>
-
-  <optgroup label="Periféricos">
-    <option value="perifericos-teclados">Teclados</option>
-    <option value="perifericos-mouse">Mouse</option>
-    <option value="perifericos-auriculares">Auriculares</option>
-    <option value="perifericos-monitores">Monitores</option>
-    <option value="perifericos-mousepads">Mousepads</option>
-  </optgroup>
-
-  <optgroup label="Apple">
-    <option value="auriculares">Auriculares Apple</option>
-    <option value="fundas">Fundas</option>
-    <option value="templados">Templados</option>
-    <option value="cargadores">Cargadores</option>
-    <option value="protectores-camara">Protectores de cámara</option>
-  </optgroup>
-</select>
-
-<input
-  type="text"
-  id="adminCompatibleModels"
-  placeholder="Compatibilidad / detalle. Ej: AM4, AM5, DDR4, DDR5, Intel, AMD"
-/>
-
-      <button
-  class="btn btn-primary"
-  id="adminSubmitBtn"
-  onclick="addNewProduct()"
->
-  Agregar Producto
-</button>
-
-    </div>
-
-  </div>
-
-  <div
-  class="admin-products-list"
-  id="adminProductsList"
-></div>
-
-<div class="admin-orders-section">
-
-  <h2>Pedidos recibidos</h2>
-
-  <button
-    class="btn btn-primary"
-    onclick="loadAllOrdersForAdmin()"
-  >
-    Actualizar pedidos
-  </button>
-
-  <div class="admin-dashboard">
-
-  <div class="admin-stat-card">
-    <span>📦 Pedidos</span>
-    <strong id="totalOrders">0</strong>
-  </div>
-
-  <div class="admin-stat-card">
-    <span>💰 Ventas</span>
-    <strong id="totalSales">USD 0</strong>
-  </div>
-
-  <div class="admin-stat-card">
-    <span>👤 Clientes</span>
-    <strong id="totalCustomers">0</strong>
-  </div>
-
-  <div class="admin-stat-card">
-    <span>🟡 Pendientes</span>
-    <strong id="pendingOrders">0</strong>
-  </div>
-
-</div>
-
-  <div id="adminOrdersList"></div>
-
-</div>
-
-</section>
-
-  </div>
-
-</div>
-
-
-<!-- BENEFICIOS PREMIUM -->
-
-<section class="home-benefits" id="beneficios">
-
-  <div class="container">
-
-    <div class="section-title">
-
-      <span class="section-kicker">CONFIANZA VM STORE</span>
-
-      <h2>¿Por qué elegirnos?</h2>
-
-      <p>
-        Tecnología, asesoramiento y atención real antes y después de tu compra.
-      </p>
-
-    </div>
-
-    <div class="benefits-grid">
-
-      <div class="benefit-card">
-        <i data-lucide="truck"></i>
-        <h3>Envíos y entregas</h3>
-        <p>
-          Coordinamos envíos y entregas para que recibas tus productos de forma segura.
-        </p>
-      </div>
-
-      <div class="benefit-card">
-        <i data-lucide="shield-check"></i>
-        <h3>Garantía real</h3>
-        <p>
-          Equipos revisados, probados y con respaldo para que compres con tranquilidad.
-        </p>
-      </div>
-
-      <div class="benefit-card">
-        <i data-lucide="credit-card"></i>
-        <h3>Pagos flexibles</h3>
-        <p>
-          Transferencia, efectivo y opciones de financiación según disponibilidad.
-        </p>
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- CONTACTO PREMIUM -->
-
-<section class="home-contact" id="contacto">
-
-  <div class="container contact-premium-wrapper">
-
-    <div class="contact-info-premium">
-
-      <span class="section-kicker">CONTACTO VM STORE</span>
-
-      <h2>Hablemos de tu próxima compra</h2>
-
-      <p>
-        Consultanos por stock, presupuestos, iPhones, componentes,
-        PC Builder o servicio técnico.
-      </p>
-
-      <div class="contact-methods">
-
-        <a href="https://wa.me/541165937718" target="_blank" class="contact-method">
-          <i data-lucide="message-circle"></i>
-          <div>
-            <strong>WhatsApp</strong>
-            <span>+54 11 6593-7718</span>
-          </div>
-        </a>
-
-        <a href="mailto:vmstore@gmail.com" class="contact-method">
-          <i data-lucide="mail"></i>
-          <div>
-            <strong>Email</strong>
-            <span>vmstore@gmail.com</span>
-          </div>
-        </a>
-
-        <a
-  href="https://instagram.com/vm_store.ok"
-  target="_blank"
-  class="contact-method"
->
-
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="26"
-    height="26"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <rect
-      x="2"
-      y="2"
-      width="20"
-      height="20"
-      rx="5"
-      ry="5"
-    ></rect>
-
-    <path
-      d="M16 11.37A4 4 0 1 1 12.63 8
-      4 4 0 0 1 16 11.37z"
-    ></path>
-
-    <line
-      x1="17.5"
-      y1="6.5"
-      x2="17.51"
-      y2="6.5"
-    ></line>
-
-  </svg>
-          <div>
-            <strong>Instagram</strong>
-            <span>@vm_store.ok</span>
-          </div>
-        </a>
-
-      </div>
-
-    </div>
-
-    <form class="contact-premium-form">
-
-      <h3>Enviar consulta</h3>
-
-      <input
-        type="text"
-        placeholder="Tu nombre"
-        required
-      >
-
-      <input
-        type="email"
-        placeholder="Tu email"
-        required
-      >
-
-      <textarea
-        placeholder="Escribí tu consulta"
-      ></textarea>
-
-      <button class="btn btn-primary" type="submit">
-        Enviar mensaje
-      </button>
-
-    </form>
-
-  </div>
-
-</section>
-
-<!-- FOOTER -->
-
-<footer>
-
-  <p>
-    © 2026 VM Store - Todos los derechos reservados.
-  </p>
-
-</footer>
-
-<!-- PRODUCT MODAL PREMIUM -->
-
-<div class="product-modal" id="productModal">
-
-  <div class="product-modal-box">
-
-    <button
-      class="close-modal"
-      onclick="closeProductModal()"
-    >
-      ✕
-    </button>
-
-    <div class="product-modal-grid">
-
-      <div class="product-modal-image">
-
-        <div class="modal-badge" id="modalBadge">
-          DESTACADO
-        </div>
-
-        <img
-          id="modalImage"
-          src=""
-          alt=""
-        >
-
-      </div>
-
-      <div class="product-modal-info">
-
-        <span class="modal-kicker">
-          VM STORE
-        </span>
-
-        <h2 id="modalTitle">
-          Producto
-        </h2>
-
-        <p id="modalDescription">
-          Descripción
-        </p>
-
-        <div
-          class="modal-extra"
-          id="modalExtra"
-        ></div>
-
-        <div
-          class="modal-price"
-          id="modalPrice"
-        >
-          USD 0
-        </div>
-
-        <select id="adminProductCurrency">
-  <option value="USD">Precio en USD</option>
-  <option value="ARS">Precio en ARS</option>
-</select>
-
-<select id="adminCondition">
-  <option value="NUEVO">Nuevo</option>
-  <option value="SEMINUEVO">Seminuevo</option>
-</select>
-
-        <div class="modal-actions">
-
-          <button
-            class="btn btn-primary"
-            id="modalAddBtn"
-          >
-            Agregar al carrito
-          </button>
-
-          <button
-            class="modal-secondary-btn"
-            onclick="toggleFavorites()"
-          >
-            Favoritos
-          </button>
-
-          <a
-  id="modalWhatsappBtn"
-  class="modal-whatsapp-btn"
-  target="_blank"
->
-  Consultar por WhatsApp
-</a>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-<!-- LOGIN MODAL -->
-
-<div class="login-modal" id="loginModal">
-
-  <div class="login-box">
-
-    <button
-      class="close-login"
-      onclick="closeLoginModal()"
-    >
-      ✕
-    </button>
-
-    <h2>Panel Administrador</h2>
-
-    <input
-      type="password"
-      id="adminPassword"
-      placeholder="Contraseña"
-    >
-
-    <button
-      class="btn btn-primary"
-      onclick="loginAdmin()"
-    >
-      Ingresar
-    </button>
-
-  </div>
-
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="app.js"></script>
-<script type="module" src="firebase-products.js"></script>
-<script type="module" src="firebase-auth.js"></script>
-
-<script>
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      if(window.loadProductsFromFirebase) {
-        loadProductsFromFirebase();
-      }
-    }, 500);
-  });
-</script>
-
-<!-- ACCOUNT MODAL -->
-
-<div class="account-modal" id="accountModal">
-
-  <div class="account-box">
-
-    <button class="close-account" onclick="closeAccountModal()">
-      ✕
-    </button>
-
-    <div class="account-header">
-      <div class="account-avatar" id="accountAvatar">
-        👤
-      </div>
-
-      <div>
-        <h2 id="accountTitle">Mi cuenta</h2>
-        <p id="accountSubtitle">
-          Iniciá sesión o creá tu cuenta para guardar tus presupuestos.
-        </p>
-      </div>
-    </div>
-
-    <div class="account-tabs" id="accountTabs">
-      <button class="account-tab active" onclick="showAccountLogin()">
-        Ingresar
-      </button>
-
-      <button class="account-tab" onclick="showAccountRegister()">
-        Crear cuenta
-      </button>
-    </div>
-
-    <!-- LOGIN -->
-    <div class="account-form active" id="accountLoginForm">
-
-      <input
-        type="email"
-        id="accountLoginEmail"
-        placeholder="Email"
-      >
-
-      <input
-        type="password"
-        id="accountLoginPassword"
-        placeholder="Contraseña"
-      >
-
-      <button class="account-main-btn" onclick="loginCustomerFirebase()">
-        Iniciar sesión
-      </button>
-
-    </div>
-
-    <!-- REGISTER -->
-    <div class="account-form" id="accountRegisterForm">
-
-      <input
-        type="text"
-        id="accountRegisterName"
-        placeholder="Nombre completo"
-      >
-
-      <input
-        type="text"
-        id="accountRegisterPhone"
-        placeholder="WhatsApp"
-      >
-
-      <input
-        type="email"
-        id="accountRegisterEmail"
-        placeholder="Email"
-      >
-
-      <input
-        type="password"
-        id="accountRegisterPassword"
-        placeholder="Contraseña"
-      >
-
-      <button class="account-main-btn" onclick="registerCustomerDemo()">
-        Crear cuenta
-      </button>
-
-    </div>
-
-    <!-- PROFILE -->
-    <div class="account-profile" id="accountProfile">
-
-      <div class="profile-info-card">
-        <span>Nombre</span>
-        <strong id="profileName">-</strong>
-      </div>
-
-      <div class="profile-info-card">
-        <span>Email</span>
-        <strong id="profileEmail">-</strong>
-      </div>
-
-      <div class="profile-info-card">
-        <span>WhatsApp</span>
-        <strong id="profilePhone">-</strong>
-      </div>
-
-      <div class="profile-info-card">
-  <span>Dirección</span>
-  <strong id="profileAddress">Sin cargar</strong>
-</div>
-
-<div class="profile-info-card">
-  <span>Ciudad / Provincia</span>
-  <strong id="profileCity">Sin cargar</strong>
-</div>
-
-<div class="shipping-form">
-  <input type="text" id="shippingAddress" placeholder="Dirección">
-  <input type="text" id="shippingCity" placeholder="Ciudad / Provincia">
-
-  <button class="account-main-btn" onclick="saveShippingData()">
-    Guardar dirección
-  </button>
-</div>
-
-<div class="account-orders">
-  <h3>Mis pedidos</h3>
-  <div id="customerOrdersList"></div>
-</div>
-
-      <div class="profile-actions">
-        <button class="account-main-btn" onclick="fillBudgetClientData()">
-          Usar mis datos en el presupuesto
-        </button>
-
-        <button class="account-logout-btn" onclick="logoutCustomerDemo()">
-          Cerrar sesión
-        </button>
-      </div>
-
-  </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-<!-- TOAST -->
-
-<div class="toast" id="toast">
-
-  <span id="toastText">
-    Producto agregado
-  </span>
-
-</div>
-
-<script>
-  window.addEventListener("DOMContentLoaded", () => {
-    renderProducts("componentes");
-    updateShopHero("componentes");
-  });
-</script>
-
+  </main>
 
 </body>
 </html>
