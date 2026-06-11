@@ -3093,19 +3093,23 @@ function setCurrency(newCurrency) {
 
   } else if(page === "iphones.html") {
 
+  if(currentCategory === "accesorios-apple") {
+
+    if(typeof renderProducts === "function") {
+      renderProducts("accesorios-apple");
+    }
+
+  } else {
+
     currentCategory = "iphones";
 
     if(typeof renderProducts === "function") {
       renderProducts("iphones");
     }
 
-  } else {
-
-    if(typeof renderProducts === "function") {
-      renderProducts(currentCategory || "all");
-    }
-
   }
+
+}
 
   if(typeof renderFavorites === "function") {
     renderFavorites();
