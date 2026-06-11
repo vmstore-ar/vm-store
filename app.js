@@ -963,10 +963,20 @@ function addToCartFromData(name, price, image) {
   const currentProduct =
     allProducts.find(product => product.name === name);
 
+  const realPrice =
+    currentProduct
+      ? Number(currentProduct.price)
+      : Number(price);
+
   const productCurrency =
     currentProduct
       ? currentProduct.productCurrency || currentProduct.originalCurrency || "USD"
       : "USD";
+
+  const productImage =
+    currentProduct && currentProduct.image
+      ? currentProduct.image
+      : image;
 
   if(currentProduct && currentProduct.stock <= 0) {
     showToast("Producto sin stock");
@@ -977,15 +987,19 @@ function addToCartFromData(name, price, image) {
     cart.find(item => item.name === name);
 
   if (existingProduct) {
+
     existingProduct.quantity++;
+
   } else {
+
     cart.push({
       name,
-      price,
+      price: realPrice,
       quantity: 1,
-      image,
+      image: productImage,
       productCurrency
     });
+
   }
 
   updateCart();
