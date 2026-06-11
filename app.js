@@ -1011,7 +1011,18 @@ function updateCart() {
   cartItems.innerHTML = "";
 
   cart.forEach((item, index) => {
-    total += item.price * item.quantity;
+    const itemCurrency =
+  item.productCurrency || "USD";
+
+if(itemCurrency === "ARS") {
+
+  total += item.price * item.quantity;
+
+} else {
+
+  total += item.price * item.quantity * exchangeRate;
+
+}
 
     cartItems.innerHTML += `
       <div class="cart-item">
@@ -1064,16 +1075,12 @@ function updateCart() {
 
 cartTotal.innerHTML = `
   <span style="display:block;font-size:.85rem;color:#94a3b8;">
-    Total estimado
+    Total a pagar
   </span>
 
   <strong>
-    ${formatPrice(total, "USD")}
+    ARS ${Math.round(totalARS).toLocaleString("es-AR")}
   </strong>
-
-  <small style="display:block;margin-top:4px;color:#94a3b8;">
-    Equivalente ARS ${Math.round(totalARS).toLocaleString("es-AR")}
-  </small>
 `;
 
   let message =
@@ -1084,7 +1091,7 @@ cartTotal.innerHTML = `
       `• ${item.name} x${item.quantity} - ${formatPrice(item.price)}%0A`;
   });
 
-  message += `%0ATotal: ${formatPrice(total)}`;
+  message += `%0ATotal: ARS ${Math.round(totalARS).toLocaleString("es-AR")}`;
 
   window.cartCheckoutMessage = message;
   window.cartCheckoutTotal = total;
