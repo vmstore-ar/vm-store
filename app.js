@@ -1048,8 +1048,33 @@ function updateCart() {
     `;
   });
 
-  cartTotal.innerText =
-    `Total: ${formatPrice(total)}`;
+  const totalARS =
+  cart.reduce((sum, item) => {
+
+    const itemCurrency =
+      item.productCurrency || "USD";
+
+    if(itemCurrency === "ARS") {
+      return sum + item.price * item.quantity;
+    }
+
+    return sum + item.price * item.quantity * exchangeRate;
+
+  }, 0);
+
+cartTotal.innerHTML = `
+  <span style="display:block;font-size:.85rem;color:#94a3b8;">
+    Total estimado
+  </span>
+
+  <strong>
+    ${formatPrice(total, "USD")}
+  </strong>
+
+  <small style="display:block;margin-top:4px;color:#94a3b8;">
+    Equivalente ARS ${Math.round(totalARS).toLocaleString("es-AR")}
+  </small>
+`;
 
   let message =
     "Hola! Quiero comprar:%0A%0A";
