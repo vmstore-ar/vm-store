@@ -6284,3 +6284,66 @@ button {
   font-weight:700;
   cursor:pointer;
 }
+
+.bank-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(8px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999999;
+}
+
+.bank-modal.active{
+  display:flex;
+}
+
+.bank-modal-box{
+  width:90%;
+  max-width:520px;
+  padding:30px;
+  border-radius:26px;
+  background:#111;
+  border:1px solid rgba(255,255,255,.1);
+  color:white;
+}
+
+.bank-modal-box h2{
+  margin-bottom:12px;
+}
+
+.bank-modal-box p{
+  color:#94a3b8;
+  margin-bottom:22px;
+}
+
+.bank-data-card{
+  padding:18px;
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  margin-bottom:14px;
+}
+
+.bank-data-card span{
+  display:block;
+  color:#94a3b8;
+  font-size:.85rem;
+  margin-bottom:6px;
+}
+
+.bank-data-card strong{
+  display:block;
+  margin-bottom:12px;
+}
+
+.bank-data-card button{
+  width:100%;
+  height:42px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+}

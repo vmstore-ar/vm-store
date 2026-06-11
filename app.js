@@ -4117,29 +4117,22 @@ function closePaymentModal() {
 function transferARS() {
   closePaymentModal();
 
-  showToast("Pedido generado para transferencia ARS");
-
-  alert(
-    "Transferencia en pesos\n\n" +
-    "Alias: TU-ALIAS-ARS\n" +
-    "CBU: TU-CBU-ARS\n\n" +
-    "Luego enviá el comprobante por WhatsApp."
-  );
-
-  finishCartOrder();
+  openBankModal({
+    title: "Transferencia en pesos",
+    text: "Transferí el total en ARS y luego enviá el comprobante por WhatsApp.",
+    alias: "TU-ALIAS-ARS",
+    cbu: "TU-CBU-ARS"
+  });
 }
 
 function transferUSD() {
   closePaymentModal();
 
-  showToast("Pedido generado para transferencia USD");
-
-  alert(
-    "Transferencia en dólares\n\n" +
-    "Alias: TU-ALIAS-USD\n" +
-    "CBU USD: TU-CBU-USD\n\n" +
-    "Luego enviá el comprobante por WhatsApp."
-  );
-
-  finishCartOrder();
+  openBankModal({
+    title: "Transferencia en dólares",
+    text: "Transferí el total en USD y luego enviá el comprobante por WhatsApp.",
+    alias: "TU-ALIAS-USD",
+    cbu: "TU-CBU-USD"
+  });
 }
+

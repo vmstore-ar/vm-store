@@ -101,11 +101,54 @@
         💵 Transferencia USD
       </button>
 
-      <button class="payment-option-btn" onclick="finishCartOrder()">
-        📱 WhatsApp
-      </button>
+      <button
+  class="payment-option-btn"
+  onclick="finishCartOrder('WhatsApp', 'No pagado')"
+>
+  📱 WhatsApp
+</button>
 
     </div>
+
+  </div>
+
+</div>
+
+<div class="bank-modal" id="bankModal">
+
+  <div class="bank-modal-box">
+
+    <button
+      class="close-modal"
+      onclick="closeBankModal()"
+    >
+      ✕
+    </button>
+
+    <h2 id="bankModalTitle">Transferencia</h2>
+
+    <p id="bankModalText">
+      Realizá la transferencia con los siguientes datos.
+    </p>
+
+    <div class="bank-data-card">
+      <span>Alias</span>
+      <strong id="bankAlias">-</strong>
+      <button onclick="copyBankData('bankAlias')">Copiar alias</button>
+    </div>
+
+    <div class="bank-data-card">
+      <span>CBU / CVU</span>
+      <strong id="bankCbu">-</strong>
+      <button onclick="copyBankData('bankCbu')">Copiar CBU</button>
+    </div>
+
+    <button
+      class="btn btn-primary"
+      onclick="finishCartOrder()"
+    >
+      Continuar por WhatsApp
+    </button>
 
   </div>
 
