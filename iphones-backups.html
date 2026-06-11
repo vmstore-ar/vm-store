@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="icon" type="image/png" href="imagenes/logo.png">
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>VM Store | iPhones</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style-clean.css">
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/aos@2.3.1/dist/aos.css"
+  />
+
+</head>
+
+<body>
+
+<!-- WHATSAPP -->
+
+<a
+  href="https://wa.me/541165937718"
+  class="whatsapp-float"
+  target="_blank"
+>
+  💬
+</a>
+
+<!-- CARRITO -->
+
+<div class="cart-panel" id="cartPanel">
+
+  <div class="cart-header">
+
+    <h3>Carrito</h3>
+
+    <button onclick="toggleCart()">
+      ✕
+    </button>
+
+  </div>
+
+  <div id="cart-items"></div>
+
+  <div class="cart-footer">
+
+    <div class="cart-total">
+
+      <span>Total</span>
+
+      <strong id="cart-total">
+        USD 0
+      </strong>
+
+    </div>
+
+    <a
+      id="checkoutBtn"
+      target="_blank"
+    >
+      <button class="checkout-btn">
+        Finalizar compra
+      </button>
+    </a>
+
+    <button
+      class="clear-cart-btn"
+      onclick="clearCart()"
+    >
+      Vaciar carrito
+    </button>
+
+  </div>
+
+</div>
+
+<!-- FAVORITOS PANEL -->
+
+<div class="favorites-panel" id="favoritesPanel">
+
+  <div class="favorites-header">
+    <h3>Favoritos</h3>
+    <button onclick="toggleFavorites()">✕</button>
+  </div>
+
+  <div id="favorites-panel-items"></div>
+
+</div>
+
+<!-- HEADER -->
+
+<header>
+
+  <div class="container navbar">
+
+    <a href="index.html" class="logo">
+
+      <img
+        src="imagenes/logo.png"
+        alt="Logo"
+      >
+
+      <span>VM STORE</span>
+
+    </a>
+
+    <div class="header-search">
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="Buscar productos..."
+    onkeyup="searchProducts()"
+  >
+</div>
+
+<div class="header-actions">
+
+    <button
+      class="theme-toggle"
+      onclick="toggleTheme()"
+    >
+      🌙
+    </button>
+
+    <button
+      class="admin-login-btn"
+      id="adminAccessBtn"
+      onclick="handleAdminAccess()"
+    >
+      🔐 Admin
+    </button>
+
+    <button
+      class="admin-login-btn"
+      id="openAdminPanelBtn"
+      onclick="openAdminPanel()"
+      style="display:none;"
+    >
+      ⚙️ Panel
+    </button>
+
+    <div class="currency-switch">
+
+  <button
+    class="currency-btn active"
+    id="usdBtn"
+    onclick="setCurrency('USD')"
+  >
+    USD
+  </button>
+
+  <button
+    class="currency-btn"
+    id="arsBtn"
+    onclick="setCurrency('ARS')"
+  >
+    ARS
+  </button>
+
+  <button
+  class="account-btn"
+  onclick="openAccountModal()"
+>
+  👤 Mi cuenta
+</button>
+
+<div
+  class="favorites-icon"
+  onclick="toggleFavorites()"
+>
+
+  <i data-lucide="heart"></i>
+
+  <span id="favorites-count">0</span>
+
+</div>
+
+</div>
+
+    <div
+  class="cart-icon futuristic-cart"
+  onclick="toggleCart()"
+>
+
+  <i data-lucide="shopping-cart"></i>
+
+  <span id="cart-count">0</span>
+
+</div>
+
+    </div>
+
+    <div
+      class="menu-toggle"
+      id="menuToggle"
+    >
+      ☰
+    </div>
+
+  </div>
+
+</header>
+
+<!-- SUB HEADER -->
+
+<nav class="sub-header">
+
+  <div class="sub-header-container">
+
+    <a href="index.html" class="sub-link" data-page="index">Inicio</a>
+
+    <a href="tienda.html" class="sub-link" data-page="tienda">Tienda</a>
+
+    <a href="builder.html" class="sub-link" data-page="builder">Armá tu PC</a>
+
+    <a href="iphones.html" class="sub-link" data-page="iphones">iPhones</a>
+
+    <a href="#contacto" class="sub-link" data-page="contacto">Contacto</a>
+
+  </div>
+
+</nav>
+
+<!-- HERO IPHONES -->
+
+<section class="hero">
+
+  <div class="container hero-content">
+
+    <div class="hero-text">
+
+      <h1>
+        iPhones nuevos y seminuevos
+      </h1>
+
+      <p>
+        Equipos originales, accesorios,
+        fundas, cargadores y todo el ecosistema Apple.
+      </p>
+
+      <a
+        href="#iphonesProducts"
+        class="btn btn-primary"
+      >
+        Ver productos
+      </a>
+
+    </div>
+
+    <div class="hero-image">
+
+      <img
+        src="imagenes/slider1.png"
+        alt="iPhones"
+      >
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- PRODUCTOS -->
+
+<section
+  id="iphonesProducts"
+  class="shop-page"
+  data-aos="fade-up"
+>
+
+  <div class="container">
+
+    <div class="section-title">
+
+      <h2>iPhones</h2>
+
+      <p>
+        Productos Apple disponibles actualmente.
+      </p>
+
+    </div>
+
+      
+
+    </div>
+
+    <div class="filters">
+
+      <select
+        id="sortFilter"
+        onchange="applyFilters()"
+      >
+
+        <option value="default">
+          Ordenar
+        </option>
+
+        <option value="low">
+          Menor precio
+        </option>
+
+        <option value="high">
+          Mayor precio
+        </option>
+
+      </select>
+
+      <input
+        type="number"
+        id="minPrice"
+        placeholder="Precio mínimo"
+        oninput="applyFilters()"
+      >
+
+      <input
+        type="number"
+        id="maxPrice"
+        placeholder="Precio máximo"
+        oninput="applyFilters()"
+      >
+
+    </div>
+
+    <div
+      class="products-grid"
+      id="productsContainer"
+    ></div>
+
+  </div>
+
+</section>
+
+
+
+<!-- CONTACTO -->
+
+<section
+  class="contact"
+  id="contacto"
+  data-aos="fade-up"
+>
+
+  <div class="container contact-wrapper">
+
+    <div>
+
+      <h2
+        style="
+          font-size:2.8rem;
+          margin-bottom:20px;
+        "
+      >
+        Contactanos
+      </h2>
+
+      <p
+        style="
+          color:#cbd5e1;
+          margin-bottom:20px;
+        "
+      >
+        Consultanos por stock,
+        capacidades y modelos disponibles.
+      </p>
+
+      <p>
+        <strong>WhatsApp:</strong>
+        +54 11 6593 - 7718
+      </p>
+
+      <p>
+        <strong>Email:</strong>
+        vmstore@gmail.com
+      </p>
+
+    </div>
+
+    <form class="contact-form">
+
+      <input
+        type="text"
+        placeholder="Tu nombre"
+        required
+      >
+
+      <input
+        type="email"
+        placeholder="Tu email"
+        required
+      >
+
+      <textarea
+        placeholder="Escribí tu consulta"
+      ></textarea>
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+      >
+        Enviar mensaje
+      </button>
+
+    </form>
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+
+<footer>
+
+  <p>
+    © 2026 VM Store - Todos los derechos reservados.
+  </p>
+
+</footer>
+
+<!-- MODAL PRODUCTO -->
+
+<div class="product-modal" id="productModal">
+
+  <div class="modal-content">
+
+    <button
+      class="close-modal"
+      onclick="closeProductModal()"
+    >
+      ✕
+    </button>
+
+    <div class="modal-image">
+
+      <img
+        id="modalImage"
+        src=""
+        alt=""
+      >
+
+    </div>
+
+    <div class="modal-info">
+
+      <span
+        class="modal-badge"
+        id="modalBadge"
+      >
+        DESTACADO
+      </span>
+
+      <h2 id="modalTitle">
+        Producto
+      </h2>
+
+      <p id="modalDescription">
+        Descripción
+      </p>
+
+      <div
+        class="modal-price"
+        id="modalPrice"
+      >
+        USD 0
+      </div>
+
+      <div
+        class="modal-extra"
+        id="modalExtra"
+      >
+
+        <p>✅ Garantía oficial</p>
+
+        <p>🚚 Envíos disponibles</p>
+
+        <p>💳 Financiación disponible</p>
+
+        <p>📦 Stock inmediato</p>
+
+      </div>
+
+      <button
+        class="btn btn-primary"
+        id="modalAddBtn"
+      >
+        Agregar al carrito
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- LOGIN MODAL -->
+
+<div class="login-modal" id="loginModal">
+
+  <div class="login-box">
+
+    <button
+      class="close-login"
+      onclick="closeLoginModal()"
+    >
+      ✕
+    </button>
+
+    <h2>
+      Panel Administrador
+    </h2>
+
+    <input
+      type="password"
+      id="adminPassword"
+      placeholder="Contraseña"
+    >
+
+    <button
+      class="btn btn-primary"
+      onclick="loginAdmin()"
+    >
+      Ingresar
+    </button>
+
+  </div>
+
+</div>
+
+<!-- TOAST -->
+
+<div class="toast" id="toast">
+
+  <span id="toastText">
+    Producto agregado
+  </span>
+
+</div>
+
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<script>
+  AOS.init({
+    duration: 1000,
+    once: true
+  });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
+<script type="module" src="firebase-products.js"></script>
+
+<script>
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      if(window.loadProductsFromFirebase) {
+        loadProductsFromFirebase();
+      }
+    }, 500);
+  });
+</script>
+
+<script>
+  lucide.createIcons();
+</script>
+<div class="admin-modal" id="adminModal">
+
+  <div class="admin-modal-content">
+
+    <button
+      class="close-admin-modal"
+      onclick="closeAdminPanel()"
+    >
+      ✕
+    </button>
+
+<section class="admin-panel">
+
+  <div class="container">
+
+    <div class="section-title">
+
+      <h2>Panel Administrador</h2>
+
+      <p>
+        Agregá productos dinámicamente.
+      </p>
+
+    </div>
+
+    <div class="admin-form">
+
+      <input
+        type="text"
+        id="adminName"
+        placeholder="Nombre del producto"
+      >
+
+      <input
+        type="text"
+        id="adminDescription"
+        placeholder="Descripción"
+      >
+
+      <input
+        type="number"
+        id="adminPrice"
+        placeholder="Precio"
+      >
+
+      <input
+  type="file"
+  id="adminImage"
+  accept="image/*"
+>
+
+<input
+  type="text"
+  id="adminImageUrl"
+  placeholder="Ruta o URL de imagen. Ej: imagenes/iphone.jpg"
+>
+
+<img
+  id="imagePreview"
+  style="
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 16px;
+    display: none;
+  "
+>
+
+      <select id="adminCategory">
+
+  <option value="componentes">
+    Componentes
+  </option>
+
+  <option value="notebooks">
+    Notebooks
+  </option>
+
+  <option value="pcs">
+    PCs Armadas
+  </option>
+
+  <option value="perifericos">
+    Periféricos
+  </option>
+
+  <option value="iphones">
+    iPhones
+  </option>
+
+</select>
+
+      <button
+  class="btn btn-primary"
+  id="adminSubmitBtn"
+  onclick="addNewProduct()"
+>
+  Agregar Producto
+</button>
+
+    </div>
+
+  </div>
+
+  <div
+  class="admin-products-list"
+  id="adminProductsList"
+></div>
+
+</section>
+
+  </div>
+
+</div>
+
+</body>
+</html>

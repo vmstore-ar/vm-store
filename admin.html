@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="icon" type="image/png" href="imagenes/logo.png">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>VM Store | Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style-clean.css">
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+  <aside class="admin-sidebar">
+
+    <a href="index.html" class="admin-logo">
+  <img src="imagenes/logo.png" alt="VM Store">
+  <span>VM STORE</span>
+</a>
+
+    <button class="admin-menu-btn active" onclick="showAdminSection('products', this)">
+  📦 Productos
+</button>
+
+<button class="admin-menu-btn" onclick="showAdminSection('orders', this)">
+  📋 Pedidos
+</button>
+
+<button class="admin-menu-btn" onclick="showAdminSection('customers', this)">
+  👤 Clientes
+</button>
+
+<button class="admin-menu-btn" onclick="showAdminSection('settings', this)">
+  ⚙️ Configuración
+</button>
+
+    <a href="index.html" class="admin-back-btn">
+      ← Volver a la tienda
+    </a>
+
+  </aside>
+
+  <main class="admin-content">
+
+    <div class="admin-topbar">
+      <div>
+        <h1>Panel Administrador</h1>
+        <span>VM STORE Dashboard</span>
+      </div>
+    </div>
+
+    <div class="admin-dashboard">
+
+          <div class="admin-stat-card">
+            <span>📦 Pedidos</span>
+            <strong id="totalOrders">0</strong>
+          </div>
+
+          <div class="admin-stat-card">
+            <span>💰 Ventas</span>
+            <strong id="totalSales">USD 0</strong>
+          </div>
+
+          <div class="admin-stat-card">
+            <span>👤 Clientes</span>
+            <strong id="totalCustomers">0</strong>
+          </div>
+
+          <div class="admin-stat-card">
+            <span>🟡 Pendientes</span>
+            <strong id="pendingOrders">0</strong>
+          </div>
+
+        </div>
+
+
+    <section class="admin-section active" id="adminSectionProducts">
+
+      <div class="section-title">
+        <h2>Productos</h2>
+        <p>Agregá, editá o eliminá productos.</p>
+      </div>
+
+      <div class="admin-form">
+
+        <input type="text" id="adminName" placeholder="Nombre del producto">
+        <input type="text" id="adminDescription" placeholder="Descripción">
+        <input type="number" id="adminPrice" placeholder="Precio">
+
+        <select id="adminProductCurrency">
+          <option value="USD">Precio en USD</option>
+          <option value="ARS">Precio en ARS</option>
+        </select>
+
+        <select id="adminCondition">
+          <option value="NUEVO">Nuevo</option>
+          <option value="SEMINUEVO">Seminuevo</option>
+        </select>
+
+        <input type="file" id="adminImage" accept="image/*">
+
+        <input
+          type="text"
+          id="adminImageUrl"
+          placeholder="Ruta o URL de imagen. Ej: imagenes/iphone.jpg"
+        >
+
+        <img
+          id="imagePreview"
+          style="width:100%;max-height:220px;object-fit:cover;border-radius:16px;display:none;"
+        >
+
+        <select id="adminCategory">
+          <option value="componentes">Componentes</option>
+          <option value="notebooks">Notebooks</option>
+          <option value="pcs">PCs Armadas</option>
+          <option value="perifericos">Periféricos</option>
+          <option value="iphones">iPhones</option>
+          <option value="accesorios-apple">Accesorios Apple</option>
+        </select>
+
+        <select id="adminSubCategory">
+          <option value="">Sin subcategoría</option>
+
+          <optgroup label="Componentes">
+            <option value="procesadores-amd">Procesadores AMD</option>
+            <option value="procesadores-intel">Procesadores Intel</option>
+            <option value="motherboards-amd">Motherboards AMD</option>
+            <option value="motherboards-intel">Motherboards Intel</option>
+            <option value="memorias-ram">Memorias RAM Desktop</option>
+            <option value="ram-notebook">RAM Notebook</option>
+            <option value="ssd">SSD</option>
+            <option value="hdd">HDD</option>
+            <option value="nvme">NVMe</option>
+            <option value="placas-nvidia">Placas NVIDIA</option>
+            <option value="placas-amd">Placas AMD Radeon</option>
+            <option value="placas-intel">Placas Intel Arc</option>
+            <option value="fuentes">Fuentes</option>
+            <option value="gabinetes">Gabinetes</option>
+            <option value="cooler-cpu">Cooler CPU</option>
+            <option value="water-cooling">Water Cooling</option>
+            <option value="coolers-gabinete">Coolers gabinete</option>
+          </optgroup>
+
+          <optgroup label="Notebooks">
+            <option value="notebooks-oficina">Notebooks oficina</option>
+            <option value="notebooks-gamer">Notebooks gamer</option>
+            <option value="notebooks-estudio">Notebooks estudio</option>
+          </optgroup>
+
+          <optgroup label="Periféricos">
+            <option value="perifericos-teclados">Teclados</option>
+            <option value="perifericos-mouse">Mouse</option>
+            <option value="perifericos-auriculares">Auriculares</option>
+            <option value="perifericos-monitores">Monitores</option>
+            <option value="perifericos-mousepads">Mousepads</option>
+          </optgroup>
+
+          <optgroup label="Apple">
+            <option value="auriculares">Auriculares Apple</option>
+            <option value="fundas">Fundas</option>
+            <option value="templados">Templados</option>
+            <option value="cargadores">Cargadores</option>
+            <option value="protectores-camara">Protectores de cámara</option>
+          </optgroup>
+
+        </select>
+
+        <input
+          type="text"
+          id="adminCompatibleModels"
+          placeholder="Compatibilidad / detalle. Ej: AM4, AM5, DDR4, iPhone 13"
+        >
+
+        <div class="admin-variants-box">
+
+  <h3>Variantes iPhone</h3>
+
+  <input
+    type="text"
+    id="variantColor"
+    placeholder="Color. Ej: Azul"
+  >
+
+  <input
+    type="text"
+    id="variantStorage"
+    placeholder="Capacidad. Ej: 128GB"
+  >
+
+  <input
+    type="number"
+    id="variantPrice"
+    placeholder="Precio variante"
+  >
+
+  <input
+    type="text"
+    id="variantImage"
+    placeholder="Imagen variante. Ej: imagenes/iphone13-azul.jpg"
+  >
+
+  <button
+    type="button"
+    class="btn"
+    onclick="addVariantToTempList()"
+  >
+    + Agregar variante
+  </button>
+
+  <div id="variantList"></div>
+
+</div>
+
+        <button
+          class="btn btn-primary"
+          id="adminSubmitBtn"
+          onclick="addNewProduct()"
+        >
+          Agregar Producto
+        </button>
+
+      </div>
+
+      <div class="admin-search-box">
+
+  <input
+    type="text"
+    id="adminSearchInput"
+    placeholder="🔍 Buscar producto..."
+    onkeyup="filterAdminProducts()"
+  >
+
+</div>
+
+      <div class="admin-products-table">
+
+  <div class="admin-table-header">
+
+    <div>Imagen</div>
+    <div>Producto</div>
+    <div>Categoría</div>
+    <div>Precio</div>
+    <div>Stock</div>
+    <div>Acciones</div>
+
+  </div>
+
+  <div id="adminProductsList"></div>
+
+</div>
+
+    </section>
+
+    <section class="admin-section" id="adminSectionOrders">
+
+  <div class="section-title">
+    <h2>Pedidos</h2>
+    <p>Administrá los pedidos recibidos.</p>
+  </div>
+
+  <button
+    class="btn btn-primary"
+    onclick="loadAllOrdersForAdmin()"
+  >
+    Actualizar pedidos
+  </button>
+
+  <div id="adminOrdersList"></div>
+
+</section>
+
+<section class="admin-section" id="adminSectionCustomers">
+
+  <div class="section-title">
+    <h2>Clientes</h2>
+    <p>Clientes registrados en VM STORE.</p>
+  </div>
+
+  <button
+    class="btn btn-primary"
+    onclick="loadCustomersForAdmin()"
+  >
+    Actualizar clientes
+  </button>
+
+  <div id="adminCustomersList"></div>
+
+</section>
+
+<section class="admin-section" id="adminSectionSettings">
+
+  <div class="section-title">
+  <h2>Configuración</h2>
+  <p>Ajustes generales de la tienda.</p>
+</div>
+
+<div class="settings-card">
+
+  <label>Tipo de cambio USD → ARS</label>
+
+  <input
+    type="number"
+    id="exchangeRateInput"
+    placeholder="1300"
+  >
+
+  <label>WhatsApp</label>
+
+<input
+  type="text"
+  id="storeWhatsapp"
+  placeholder="+5491123456789"
+>
+
+<label>Instagram</label>
+
+<input
+  type="text"
+  id="storeInstagram"
+  placeholder="vmstore.ar"
+>
+
+<label>Email</label>
+
+<input
+  type="email"
+  id="storeEmail"
+  placeholder="vmstore@gmail.com"
+>
+
+  <button
+  class="btn btn-primary"
+  onclick="saveStoreSettings()"
+>
+  Guardar configuración
+</button>
+
+</div>
+
+</section>
+
+  </main>
+
+</div>
+
+<div class="toast" id="toast">
+  <span id="toastText">Producto agregado</span>
+</div>
+
+<script src="app.js"></script>
+<script type="module" src="firebase-products.js"></script>
+<script type="module" src="firebase-auth.js"></script>
+
+<script>
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      if (window.loadProductsFromFirebase) {
+        loadProductsFromFirebase();
+      }
+
+      if (typeof renderAdminProducts === "function") {
+        renderAdminProducts();
+      }
+    }, 500);
+  });
+
+  lucide.createIcons();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="icon" type="image/png" href="imagenes/logo.png">
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>VM Store | iPhones</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style-clean.css">
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/aos@2.3.1/dist/aos.css"
+  />
+
+</head>
+
+<body>
+
+<!-- WHATSAPP -->
+
+<a
+  href="https://wa.me/541165937718"
+  class="whatsapp-float"
+  target="_blank"
+>
+  💬
+</a>
+
+<!-- CARRITO -->
+
+<div class="cart-panel" id="cartPanel">
+
+  <div class="cart-header">
+
+    <h3>Carrito</h3>
+
+    <button onclick="toggleCart()">
+      ✕
+    </button>
+
+  </div>
+
+  <div id="cart-items"></div>
+
+  <div class="cart-footer">
+
+    <div class="cart-total">
+
+      <span>Total</span>
+
+      <strong id="cart-total">
+        USD 0
+      </strong>
+
+    </div>
+
+    <button
+  class="checkout-btn"
+  id="checkoutBtn"
+  onclick="finishCartOrder()"
+>
+  Finalizar compra
+</button>
+
+    <button
+  class="mp-checkout-btn"
+  onclick="payWithMercadoPago()"
+>
+  Pagar con Mercado Pago
+</button>
+
+    <button
+      class="clear-cart-btn"
+      onclick="clearCart()"
+    >
+      Vaciar carrito
+    </button>
+
+  </div>
+
+</div>
+
+<!-- FAVORITOS PANEL -->
+
+<div class="favorites-panel" id="favoritesPanel">
+
+  <div class="favorites-header">
+    <h3>Favoritos</h3>
+    <button onclick="toggleFavorites()">✕</button>
+  </div>
+
+  <div id="favorites-panel-items"></div>
+
+</div>
+
+<!-- HEADER -->
+
+<header>
+
+  <div class="container navbar">
+
+    <a href="index.html" class="logo">
+
+      <img
+        src="imagenes/logo.png"
+        alt="Logo"
+      >
+
+      <span>VM STORE</span>
+
+    </a>
+
+    <div class="header-search">
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="Buscar productos..."
+    onkeyup="searchProducts()"
+  >
+</div>
+
+<div class="header-actions">
+
+    <button
+      class="theme-toggle"
+      onclick="toggleTheme()"
+    >
+      🌙
+    </button>
+
+    <button
+      class="admin-login-btn"
+      id="adminAccessBtn"
+      onclick="handleAdminAccess()"
+    >
+      🔐 Admin
+    </button>
+
+    <button
+      class="admin-login-btn"
+      id="openAdminPanelBtn"
+      onclick="openAdminPanel()"
+      style="display:none;"
+    >
+      ⚙️ Panel
+    </button>
+
+    <div class="currency-switch">
+
+  <button
+    class="currency-btn active"
+    id="usdBtn"
+    onclick="setCurrency('USD')"
+  >
+    USD
+  </button>
+
+  <button
+    class="currency-btn"
+    id="arsBtn"
+    onclick="setCurrency('ARS')"
+  >
+    ARS
+  </button>
+
+  <button
+  class="account-btn"
+  id="accountHeaderBtn"
+  onclick="openAccountModal()"
+>
+  👤 Mi cuenta
+</button>
+
+<div
+  class="favorites-icon"
+  onclick="toggleFavorites()"
+>
+
+  <i data-lucide="heart"></i>
+
+  <span id="favorites-count">0</span>
+
+</div>
+
+</div>
+
+    <div
+  class="cart-icon futuristic-cart"
+  onclick="toggleCart()"
+>
+
+  <i data-lucide="shopping-cart"></i>
+
+  <span id="cart-count">0</span>
+
+</div>
+
+    </div>
+
+    <div
+      class="menu-toggle"
+      id="menuToggle"
+    >
+      ☰
+    </div>
+
+  </div>
+
+</header>
+
+<!-- SUB HEADER -->
+
+<nav class="sub-header">
+
+  <div class="sub-header-container">
+
+    <a href="index.html" class="sub-link" data-page="index">Inicio</a>
+
+    <a href="tienda.html" class="sub-link" data-page="tienda">Tienda</a>
+
+    <a href="builder.html" class="sub-link" data-page="builder">Armá tu PC</a>
+
+    <a href="iphones.html" class="sub-link" data-page="iphones">iPhones</a>
+
+    <a href="#contacto" class="sub-link" data-page="contacto">Contacto</a>
+
+  </div>
+
+</nav>
+
+<!-- HERO IPHONES -->
+
+<section class="hero">
+
+  <div class="container hero-content">
+
+    <div class="hero-text">
+
+      <h1>
+        iPhones nuevos y seminuevos
+      </h1>
+
+      <p>
+        Equipos originales, accesorios,
+        fundas, cargadores y todo el ecosistema Apple.
+      </p>
+
+      <a
+        href="#iphonesProducts"
+        class="btn btn-primary"
+      >
+        Ver productos
+      </a>
+
+    </div>
+
+    <div class="hero-image">
+
+      <img
+        src="imagenes/slider1.png"
+        alt="iPhones"
+      >
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- PRODUCTOS -->
+
+<section
+  id="iphonesProducts"
+  class="shop-page"
+  data-aos="fade-up"
+>
+
+  <div class="container">
+
+  <div class="section-title">
+    <h2>iPhones</h2>
+    <p>Productos Apple disponibles actualmente.</p>
+  </div>
+
+  <div class="iphone-tabs">
+    <button
+      class="iphone-tab active"
+      onclick="setIphoneSection('iphones', this)"
+    >
+      📱 iPhones
+    </button>
+
+    <button
+      class="iphone-tab"
+      onclick="setIphoneSection('accesorios-apple', this)"
+    >
+      🎧 Accesorios Apple
+    </button>
+  </div>
+
+  <div class="accessory-type-tabs" id="accessoryTypeFilters">
+
+  <span>Tipo:</span>
+
+  <button onclick="filterAppleAccessories('all', null, this)" class="type-tab active">Todos</button>
+  <button onclick="filterAppleAccessories('auriculares', null, this)" class="type-tab">Auriculares</button>
+  <button onclick="filterAppleAccessories('fundas', null, this)" class="type-tab">Fundas</button>
+  <button onclick="filterAppleAccessories('templados', null, this)" class="type-tab">Templados</button>
+  <button onclick="filterAppleAccessories('cargadores', null, this)" class="type-tab">Cargadores</button>
+  <button onclick="filterAppleAccessories('protectores-camara', null, this)" class="type-tab">Protectores de cámara</button>
+
+</div>
+
+  <div class="accessory-model-tabs" id="accessoryFilters">
+    <span>Compatible con:</span>
+
+    <button onclick="filterAppleAccessories(null, 'all', this)" class="model-tab active">Todos</button>
+<button onclick="filterAppleAccessories(null, 'iPhone 11', this)" class="model-tab">iPhone 11</button>
+<button onclick="filterAppleAccessories(null, 'iPhone 12', this)" class="model-tab">iPhone 12</button>
+<button onclick="filterAppleAccessories(null, 'iPhone 13', this)" class="model-tab">iPhone 13</button>
+<button onclick="filterAppleAccessories(null, 'iPhone 14', this)" class="model-tab">iPhone 14</button>
+<button onclick="filterAppleAccessories(null, 'iPhone 15', this)" class="model-tab">iPhone 15</button>
+<button onclick="filterAppleAccessories(null, 'iPhone 16', this)" class="model-tab">iPhone 16</button>
+  </div>
+
+  <div
+    class="products-grid"
+    id="productsContainer"
+  ></div>
+
+</div>
+
+  </div>
+
+</section>
+
+
+
+<!-- CONTACTO -->
+
+<section
+  class="contact"
+  id="contacto"
+  data-aos="fade-up"
+>
+
+  <div class="container contact-wrapper">
+
+    <div>
+
+      <h2
+        style="
+          font-size:2.8rem;
+          margin-bottom:20px;
+        "
+      >
+        Contactanos
+      </h2>
+
+      <p
+        style="
+          color:#cbd5e1;
+          margin-bottom:20px;
+        "
+      >
+        Consultanos por stock,
+        capacidades y modelos disponibles.
+      </p>
+
+      <p>
+        <strong>WhatsApp:</strong>
+        +54 11 6593 - 7718
+      </p>
+
+      <p>
+        <strong>Email:</strong>
+        vmstore@gmail.com
+      </p>
+
+    </div>
+
+    <form class="contact-form">
+
+      <input
+        type="text"
+        placeholder="Tu nombre"
+        required
+      >
+
+      <input
+        type="email"
+        placeholder="Tu email"
+        required
+      >
+
+      <textarea
+        placeholder="Escribí tu consulta"
+      ></textarea>
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+      >
+        Enviar mensaje
+      </button>
+
+    </form>
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+
+<footer>
+
+  <p>
+    © 2026 VM Store - Todos los derechos reservados.
+  </p>
+
+</footer>
+
+<!-- MODAL PRODUCTO -->
+
+<div class="product-modal" id="productModal">
+
+  <div class="modal-content">
+
+    <button
+      class="close-modal"
+      onclick="closeProductModal()"
+    >
+      ✕
+    </button>
+
+    <div class="modal-image">
+
+      <img
+        id="modalImage"
+        src=""
+        alt=""
+      >
+
+    </div>
+
+    <div class="modal-info">
+
+      <span
+        class="modal-badge"
+        id="modalBadge"
+      >
+        DESTACADO
+      </span>
+
+      <h2 id="modalTitle">
+        Producto
+      </h2>
+
+      <p id="modalDescription">
+        Descripción
+      </p>
+
+      <div
+        class="modal-price"
+        id="modalPrice"
+      >
+        USD 0
+      </div>
+
+      <div
+        class="modal-extra"
+        id="modalExtra"
+      >
+
+        <p>✅ Garantía oficial</p>
+
+        <p>🚚 Envíos disponibles</p>
+
+        <p>💳 Financiación disponible</p>
+
+        <p>📦 Stock inmediato</p>
+
+      </div>
+
+      <button
+        class="btn btn-primary"
+        id="modalAddBtn"
+      >
+        Agregar al carrito
+      </button>
+
+      <a
+  id="modalWhatsappBtn"
+  class="modal-whatsapp-btn"
+  target="_blank"
+>
+  Consultar por WhatsApp
+</a>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- LOGIN MODAL -->
+
+<div class="login-modal" id="loginModal">
+
+  <div class="login-box">
+
+    <button
+      class="close-login"
+      onclick="closeLoginModal()"
+    >
+      ✕
+    </button>
+
+    <h2>
+      Panel Administrador
+    </h2>
+
+    <input
+      type="password"
+      id="adminPassword"
+      placeholder="Contraseña"
+    >
+
+    <button
+      class="btn btn-primary"
+      onclick="loginAdmin()"
+    >
+      Ingresar
+    </button>
+
+  </div>
+
+</div>
+
+<!-- ACCOUNT MODAL -->
+
+<div class="account-modal" id="accountModal">
+
+  <div class="account-box">
+
+    <button class="close-account" onclick="closeAccountModal()">
+      ✕
+    </button>
+
+    <div class="account-header">
+      <div class="account-avatar" id="accountAvatar">
+        👤
+      </div>
+
+      <div>
+        <h2 id="accountTitle">Mi cuenta</h2>
+        <p id="accountSubtitle">
+          Iniciá sesión o creá tu cuenta para guardar tus presupuestos.
+        </p>
+      </div>
+    </div>
+
+    <div class="account-tabs" id="accountTabs">
+      <button class="account-tab active" onclick="showAccountLogin()">
+        Ingresar
+      </button>
+
+      <button class="account-tab" onclick="showAccountRegister()">
+        Crear cuenta
+      </button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="account-form active" id="accountLoginForm">
+
+      <input
+        type="email"
+        id="accountLoginEmail"
+        placeholder="Email"
+      >
+
+      <input
+        type="password"
+        id="accountLoginPassword"
+        placeholder="Contraseña"
+      >
+
+      <button class="account-main-btn" onclick="loginCustomerFirebase()">
+        Iniciar sesión
+      </button>
+
+    </div>
+
+    <!-- REGISTER -->
+    <div class="account-form" id="accountRegisterForm">
+
+      <input
+        type="text"
+        id="accountRegisterName"
+        placeholder="Nombre completo"
+      >
+
+      <input
+        type="text"
+        id="accountRegisterPhone"
+        placeholder="WhatsApp"
+      >
+
+      <input
+        type="email"
+        id="accountRegisterEmail"
+        placeholder="Email"
+      >
+
+      <input
+        type="password"
+        id="accountRegisterPassword"
+        placeholder="Contraseña"
+      >
+
+      <button class="account-main-btn" onclick="registerCustomerFirebase()">
+        Crear cuenta
+      </button>
+
+    </div>
+
+    <!-- PROFILE -->
+    <div class="account-profile" id="accountProfile">
+
+      <div class="profile-info-card">
+        <span>Nombre</span>
+        <strong id="profileName">-</strong>
+      </div>
+
+      <div class="profile-info-card">
+        <span>Email</span>
+        <strong id="profileEmail">-</strong>
+      </div>
+
+      <div class="profile-info-card">
+        <span>WhatsApp</span>
+        <strong id="profilePhone">-</strong>
+      </div>
+
+      <div class="profile-info-card">
+  <span>Dirección</span>
+  <strong id="profileAddress">Sin cargar</strong>
+</div>
+
+<div class="profile-info-card">
+  <span>Ciudad / Provincia</span>
+  <strong id="profileCity">Sin cargar</strong>
+</div>
+
+<div class="shipping-form">
+  <input type="text" id="shippingAddress" placeholder="Dirección">
+  <input type="text" id="shippingCity" placeholder="Ciudad / Provincia">
+
+  <button class="account-main-btn" onclick="saveShippingData()">
+    Guardar dirección
+  </button>
+</div>
+
+<div class="account-orders">
+  <h3>Mis pedidos</h3>
+  <div id="customerOrdersList"></div>
+</div>
+
+      <div class="profile-actions">
+        <button class="account-main-btn" onclick="fillBudgetClientData()">
+          Usar mis datos en el presupuesto
+        </button>
+
+        <button class="account-logout-btn" onclick="logoutCustomerFirebase()">
+          Cerrar sesión
+        </button>
+      </div>
+
+  </div>
+
+  </div>
+
+</div>
+
+</div>
+
+<!-- TOAST -->
+
+<div class="toast" id="toast">
+
+  <span id="toastText">
+    Producto agregado
+  </span>
+
+</div>
+
+
+<script>
+  lucide.createIcons();
+</script>
+<div class="admin-modal" id="adminModal">
+
+  <div class="admin-modal-content">
+
+    <button
+      class="close-admin-modal"
+      onclick="closeAdminPanel()"
+    >
+      ✕
+    </button>
+
+<section class="admin-panel">
+
+  <div class="container">
+
+    <div class="section-title">
+
+      <h2>Panel Administrador</h2>
+
+      <p>
+        Agregá productos dinámicamente.
+      </p>
+
+    </div>
+
+    <div class="admin-form">
+
+      <input
+        type="text"
+        id="adminName"
+        placeholder="Nombre del producto"
+      >
+
+      <input
+        type="text"
+        id="adminDescription"
+        placeholder="Descripción"
+      >
+
+      <input
+        type="number"
+        id="adminPrice"
+        placeholder="Precio"
+      >
+
+      <input
+  type="file"
+  id="adminImage"
+  accept="image/*"
+>
+
+<input
+  type="text"
+  id="adminImageUrl"
+  placeholder="Ruta o URL de imagen. Ej: imagenes/iphone.jpg"
+>
+
+<img
+  id="imagePreview"
+  style="
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 16px;
+    display: none;
+  "
+>
+
+      <select id="adminCategory">
+
+  <option value="componentes">
+    Componentes
+  </option>
+
+  <option value="notebooks">
+    Notebooks
+  </option>
+
+  <option value="pcs">
+    PCs Armadas
+  </option>
+
+  <option value="perifericos">
+    Periféricos
+  </option>
+
+  <option value="iphones">
+    iPhones
+  </option>
+
+  <option value="accesorios-apple">
+  Accesorios Apple
+</option>
+
+</select>
+
+<select id="adminSubCategory">
+  <option value="">Sin subcategoría</option>
+
+  <optgroup label="Componentes">
+    <option value="procesadores-amd">Procesadores AMD</option>
+    <option value="procesadores-intel">Procesadores Intel</option>
+    <option value="motherboards-amd">Motherboards AMD</option>
+    <option value="motherboards-intel">Motherboards Intel</option>
+    <option value="memorias-ram">Memorias RAM Desktop</option>
+    <option value="ram-notebook">RAM Notebook</option>
+    <option value="ssd">SSD</option>
+    <option value="hdd">HDD</option>
+    <option value="nvme">NVMe</option>
+    <option value="placas-nvidia">Placas NVIDIA</option>
+    <option value="placas-amd">Placas AMD Radeon</option>
+    <option value="placas-intel">Placas Intel Arc</option>
+    <option value="fuentes">Fuentes</option>
+    <option value="gabinetes">Gabinetes</option>
+    <option value="cooler-cpu">Cooler CPU</option>
+    <option value="water-cooling">Water Cooling</option>
+    <option value="coolers-gabinete">Coolers gabinete</option>
+  </optgroup>
+
+  <optgroup label="Notebooks">
+    <option value="notebooks-oficina">Notebooks oficina</option>
+    <option value="notebooks-gamer">Notebooks gamer</option>
+    <option value="notebooks-estudio">Notebooks estudio</option>
+  </optgroup>
+
+  <optgroup label="Periféricos">
+    <option value="perifericos-teclados">Teclados</option>
+    <option value="perifericos-mouse">Mouse</option>
+    <option value="perifericos-auriculares">Auriculares</option>
+    <option value="perifericos-monitores">Monitores</option>
+    <option value="perifericos-mousepads">Mousepads</option>
+  </optgroup>
+
+  <optgroup label="Apple">
+    <option value="auriculares">Auriculares Apple</option>
+    <option value="fundas">Fundas</option>
+    <option value="templados">Templados</option>
+    <option value="cargadores">Cargadores</option>
+    <option value="protectores-camara">Protectores de cámara</option>
+  </optgroup>
+</select>
+
+<input
+  type="text"
+  id="adminCompatibleModels"
+  placeholder="Modelos compatibles. Ej: iPhone 11, iPhone 12, iPhone 13"
+/>
+
+      <button
+  class="btn btn-primary"
+  id="adminSubmitBtn"
+  onclick="addNewProduct()"
+>
+  Agregar Producto
+</button>
+
+    </div>
+
+  </div>
+
+  <div
+  class="admin-products-list"
+  id="adminProductsList"
+></div>
+
+<div class="admin-orders-section">
+
+  <h2>Pedidos recibidos</h2>
+
+  <button
+    class="btn btn-primary"
+    onclick="loadAllOrdersForAdmin()"
+  >
+    Actualizar pedidos
+  </button>
+
+  <div class="admin-dashboard">
+
+  <div class="admin-stat-card">
+    <span>📦 Pedidos</span>
+    <strong id="totalOrders">0</strong>
+  </div>
+
+  <div class="admin-stat-card">
+    <span>💰 Ventas</span>
+    <strong id="totalSales">USD 0</strong>
+  </div>
+
+  <div class="admin-stat-card">
+    <span>👤 Clientes</span>
+    <strong id="totalCustomers">0</strong>
+  </div>
+
+  <div class="admin-stat-card">
+    <span>🟡 Pendientes</span>
+    <strong id="pendingOrders">0</strong>
+  </div>
+
+</div>
+
+  <div id="adminOrdersList"></div>
+
+</div>
+
+</section>
+
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<script>
+  AOS.init({
+    duration: 1000,
+    once: true
+  });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="app.js"></script>
+
+<script type="module" src="firebase-products.js"></script>
+
+<script type="module" src="firebase-auth.js"></script>
+
+<script>
+  window.addEventListener("load", async () => {
+
+    currentCategory = "iphones";
+    currentAccessoryType = "all";
+    currentAccessoryModel = "all";
+
+    if(window.loadProductsFromFirebase) {
+      await loadProductsFromFirebase();
+    }
+
+    renderProducts("iphones");
+
+  });
+</script>
+
+</body>
+</html>
