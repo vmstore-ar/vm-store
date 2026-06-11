@@ -76,7 +76,7 @@
     <button
   class="checkout-btn"
   id="checkoutBtn"
-  onclick="finishCartOrder()"
+  onclick="openPaymentModal()"
 >
   Finalizar compra
 </button>
@@ -97,7 +97,46 @@
 
   </div>
 
+  <div class="payment-modal" id="paymentModal">
+
+  <div class="payment-modal-box">
+
+    <button
+      class="close-modal"
+      onclick="closePaymentModal()"
+    >
+      ✕
+    </button>
+
+    <h2>Seleccioná un método de pago</h2>
+
+    <div class="payment-options">
+
+      <button class="payment-option-btn" onclick="payWithMercadoPago()">
+        💳 Mercado Pago
+      </button>
+
+      <button class="payment-option-btn" onclick="transferARS()">
+        🏦 Transferencia ARS
+      </button>
+
+      <button class="payment-option-btn" onclick="transferUSD()">
+        💵 Transferencia USD
+      </button>
+
+      <button class="payment-option-btn" onclick="finishCartOrder()">
+        📱 WhatsApp
+      </button>
+
+    </div>
+
+  </div>
+
 </div>
+
+</div>
+
+
 
 <!-- FAVORITOS PANEL -->
 

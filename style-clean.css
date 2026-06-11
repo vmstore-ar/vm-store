@@ -6240,3 +6240,47 @@ button {
   color:white;
   font-size:15px;
 }
+
+.payment-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(8px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999999;
+}
+
+.payment-modal.active{
+  display:flex;
+}
+
+.payment-modal-box{
+  width:90%;
+  max-width:480px;
+  padding:30px;
+  border-radius:26px;
+  background:#111;
+  border:1px solid rgba(255,255,255,.1);
+  color:white;
+}
+
+.payment-modal-box h2{
+  margin-bottom:20px;
+}
+
+.payment-options{
+  display:grid;
+  gap:12px;
+}
+
+.payment-option-btn{
+  min-height:54px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);
+  color:white;
+  font-weight:700;
+  cursor:pointer;
+}

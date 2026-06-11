@@ -4097,3 +4097,49 @@ function filterAdminProducts() {
   });
 
 }
+
+function openPaymentModal() {
+
+  document
+    .getElementById("paymentModal")
+    .classList.add("active");
+
+}
+
+function closePaymentModal() {
+
+  document
+    .getElementById("paymentModal")
+    .classList.remove("active");
+
+}
+
+function transferARS() {
+  closePaymentModal();
+
+  showToast("Pedido generado para transferencia ARS");
+
+  alert(
+    "Transferencia en pesos\n\n" +
+    "Alias: TU-ALIAS-ARS\n" +
+    "CBU: TU-CBU-ARS\n\n" +
+    "Luego enviá el comprobante por WhatsApp."
+  );
+
+  finishCartOrder();
+}
+
+function transferUSD() {
+  closePaymentModal();
+
+  showToast("Pedido generado para transferencia USD");
+
+  alert(
+    "Transferencia en dólares\n\n" +
+    "Alias: TU-ALIAS-USD\n" +
+    "CBU USD: TU-CBU-USD\n\n" +
+    "Luego enviá el comprobante por WhatsApp."
+  );
+
+  finishCartOrder();
+}
