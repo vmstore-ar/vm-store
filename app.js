@@ -4136,3 +4136,34 @@ function transferUSD() {
   });
 }
 
+function openBankModal(data) {
+
+  document.getElementById("bankModalTitle").innerText = data.title;
+  document.getElementById("bankModalText").innerText = data.text;
+  document.getElementById("bankAlias").innerText = data.alias;
+  document.getElementById("bankCbu").innerText = data.cbu;
+
+  document
+    .getElementById("bankModal")
+    .classList.add("active");
+
+}
+
+function closeBankModal() {
+
+  document
+    .getElementById("bankModal")
+    .classList.remove("active");
+
+}
+
+function copyBankData(id) {
+
+  const text =
+    document.getElementById(id).innerText;
+
+  navigator.clipboard.writeText(text);
+
+  showToast("Dato copiado");
+
+}
