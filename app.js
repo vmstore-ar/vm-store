@@ -30,6 +30,7 @@ let exchangeRate =
 let currentAccessoryType = "all";
 let currentAccessoryModel = "all";
 let currentCategory = "all";
+let selectedPaymentMethod = "WhatsApp";
 let editingProductId = null;
 let favorites =
   getSafeLocalStorage("favorites", []);
@@ -3650,6 +3651,12 @@ total += fixedPrice * Number(item.quantity || 1);
 
         <p>Pago: ${order.paymentStatus || "No pagado"}</p>
 
+       <input
+  type="file"
+  accept="image/*,.pdf"
+  onchange="handleReceiptFile(this, '${order.id}')"
+>
+
         <div class="order-detail">
           ${itemsHtml}
         </div>
@@ -3658,6 +3665,14 @@ total += fixedPrice * Number(item.quantity || 1);
       ordersList.appendChild(orderCard);
 
     });
+
+    document
+  .querySelectorAll(".receipt-upload-btn")
+  .forEach(button => {
+    button.addEventListener("click", function () {
+      openReceiptUpload(this.dataset.orderId);
+    });
+  });
 
 }
 
@@ -3904,6 +3919,19 @@ function renderCustomerOrders() {
         </p>
 
         <p>Pago: ${order.paymentStatus || "No pagado"}</p>
+
+        ${
+  (order.paymentStatus || "").toLowerCase().includes("comprobante")
+    ? `
+      <button
+  class="order-detail-btn"
+  onclick="openReceiptUpload('${order.id}')"
+>
+  Subir comprobante
+</button>
+    `
+    : ""
+}
 
         <div class="order-detail active">
           ${itemsHtml}
@@ -4183,6 +4211,8 @@ function closePaymentModal() {
 }
 
 function transferARS() {
+  selectedPaymentMethod = "Transferencia ARS";
+
   closePaymentModal();
 
   openBankModal({
@@ -4194,6 +4224,8 @@ function transferARS() {
 }
 
 function transferUSD() {
+  selectedPaymentMethod = "Transferencia USD";
+
   closePaymentModal();
 
   openBankModal({
@@ -4203,6 +4235,54 @@ function transferUSD() {
     cbu: "TU-CBU-USD"
   });
 }
+
+function finishTransferOrder() {
+  finishCartOrder(
+    selectedPaymentMethod,
+    "Pendiente de comprobante"
+  );
+}
+
+function openReceiptUpload(orderId) {
+
+  console.log("Abriendo comprobante", orderId);
+alert("Abriendo selector");
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept = "image/*,.pdf";
+
+  input.onchange = function () {
+
+    const file = input.files[0];
+
+    if (!file) return;
+
+    showToast(
+      "Comprobante seleccionado: " +
+      file.name
+    );
+
+  };
+
+  input.click();
+
+}
+
+window.handleReceiptFile = function(input, orderId) {
+
+  const file = input.files[0];
+
+  if (!file) return;
+
+  showToast("Comprobante seleccionado: " + file.name);
+
+  console.log("Pedido:", orderId);
+  console.log("Archivo:", file);
+
+};
 
 function openBankModal(data) {
 

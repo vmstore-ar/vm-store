@@ -327,7 +327,7 @@ document.getElementById("totalOrders").innerText =
   allOrders.length;
 
 document.getElementById("totalSales").innerText =
-  formatPrice(totalSales);
+  "ARS " + Math.round(totalSales).toLocaleString("es-AR");
 
 document.getElementById("totalCustomers").innerText =
   totalCustomers;
@@ -342,7 +342,12 @@ document.getElementById("pendingOrders").innerText =
       const itemsHtml = order.items.map(item => `
         <div class="admin-order-product">
           <span>${item.name} x${item.quantity}</span>
-          <strong>${formatPrice(item.price * item.quantity)}</strong>
+          <strong>
+  ${formatPrice(
+    item.price * item.quantity,
+    item.productCurrency || item.originalCurrency || order.currency || "USD"
+  )}
+</strong>
         </div>
       `).join("");
 
