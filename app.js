@@ -336,10 +336,11 @@ ${product.specs ? `
 <button
   class="buy-btn"
   onclick="event.stopPropagation(); addToCartFromData(
-    '${product.name}',
-    ${product.price},
-    '${product.image}'
-  )"
+  '${product.name}',
+  ${product.price},
+  '${product.image}',
+  '${product.productCurrency || product.originalCurrency || "USD"}'
+)"
 >
   Agregar
 </button>
@@ -1102,7 +1103,7 @@ cartTotal.innerHTML = `
 
   cart.forEach(item => {
     message +=
-      `• ${item.name} x${item.quantity} - ${formatPrice(item.price)}%0A`;
+      `• ${item.name} x${item.quantity} - ${formatPrice(item.price, item.productCurrency || "USD")}%0A`;
   });
 
   message += `%0ATotal: ARS ${Math.round(totalARS).toLocaleString("es-AR")}`;
@@ -1122,7 +1123,10 @@ cartTotal.innerHTML = `
   initLucideIcons();
 }
 
-function finishCartOrder() {
+function finishCartOrder(
+  paymentMethod = "WhatsApp",
+  paymentStatus = "Pendiente de pago"
+) {
   const currentCart =
   getSafeLocalStorage("cart", []);
 
@@ -1132,8 +1136,18 @@ function finishCartOrder() {
   }
 
   const total = currentCart.reduce((sum, item) => {
-    return sum + item.price * item.quantity;
-  }, 0);
+
+  const itemCurrency =
+    item.productCurrency || item.originalCurrency || "USD";
+
+  const itemPrice =
+    itemCurrency === "ARS"
+      ? Number(item.price) / exchangeRate
+      : Number(item.price);
+
+  return sum + itemPrice * item.quantity;
+
+}, 0);
 
   let message = "Hola! Quiero comprar:\n\n";
 
@@ -1155,8 +1169,12 @@ message += `\nTotal: ${formatPrice(total, currency)}`;
     customerPhone: customer ? customer.phone : "",
     items: [...currentCart],
     total: total,
-    currency: currency,
-    status: "Pendiente"
+    currency: "USD",
+displayCurrency: currency,
+    status: "Pendiente",
+paymentMethod: paymentMethod,
+paymentStatus: paymentStatus,
+receiptUrl: ""
   };
 
   let orders =
@@ -3534,14 +3552,23 @@ function renderCustomerOrders() {
   if (!ordersList) return;
 
   if (!customer || !customer.orders || customer.orders.length === 0) {
-
     ordersList.innerHTML = `
       <p class="no-orders">
         Todavía no hay pedidos.
       </p>
     `;
-
     return;
+  }
+
+  function money(value, currencyType) {
+    const number = Number(value) || 0;
+
+    const finalCurrency =
+      currencyType === "USD"
+        ? "USD"
+        : "ARS";
+
+    return `${finalCurrency} ${number.toLocaleString("es-AR")}`;
   }
 
   ordersList.innerHTML = "";
@@ -3552,42 +3579,76 @@ function renderCustomerOrders() {
     .forEach(order => {
 
       const orderCard = document.createElement("div");
-
       orderCard.className = "order-card";
 
       const itemsHtml =
-        order.items.map(item => `
-          <div class="order-product">
-            <span>${item.name} x${item.quantity}</span>
-            <strong>${formatPrice(item.price * item.quantity)}</strong>
-          </div>
-        `).join("");
+        order.items.map(item => {
+
+          let itemCurrency =
+            item.productCurrency ||
+            item.originalCurrency ||
+            order.currency ||
+            "ARS";
+
+          if (Number(item.price) > 1000) {
+            itemCurrency = "ARS";
+          }
+
+          return `
+            <div class="order-product">
+              <span>${item.name} x${item.quantity}</span>
+              <strong>
+                ${money(
+  itemCurrency === "ARS" && Number(item.price) > 1000000
+    ? (Number(item.price) / exchangeRate) * item.quantity
+    : Number(item.price) * item.quantity,
+  itemCurrency
+)}
+              </strong>
+            </div>
+          `;
+
+        }).join("");
+
+      let total = 0;
+      let orderCurrency = "ARS";
+
+      order.items.forEach(item => {
+        let fixedPrice = Number(item.price);
+
+if (
+  (item.productCurrency === "ARS" || item.originalCurrency === "ARS") &&
+  fixedPrice > 1000000
+) {
+  fixedPrice = fixedPrice / exchangeRate;
+}
+
+total += fixedPrice * Number(item.quantity || 1);
+
+        if (
+          item.productCurrency === "USD" ||
+          item.originalCurrency === "USD"
+        ) {
+          orderCurrency = "USD";
+        }
+      });
 
       orderCard.innerHTML = `
-        <strong>${order.id || "Pedido"}</strong>
+        <strong>Pedido #${order.id || "Pedido"}</strong>
 
-        <p>Total: ${formatPrice(order.total)}</p>
+        <p>Fecha: ${order.date || order.createdAt || "-"}</p>
+        <p>Total: ${money(total, orderCurrency)}</p>
+
         <p>
-  <strong>Estado:</strong>
+          <strong>Estado:</strong>
+          <span class="order-status ${(
+            order.status || "Pendiente"
+          ).toLowerCase()}">
+            ${order.status || "Pendiente"}
+          </span>
+        </p>
 
-  <span class="order-status ${(
-    order.status || "Pendiente"
-  ).toLowerCase()}">
-
-    ${order.status || "Pendiente"}
-
-  </span>
-
-</p>
         <p>Pago: ${order.paymentStatus || "No pagado"}</p>
-        <p>Fecha: ${order.createdAt}</p>
-
-        <button
-          class="order-detail-btn"
-          onclick="toggleOrderDetail(this)"
-        >
-          Ver detalle
-        </button>
 
         <div class="order-detail">
           ${itemsHtml}
@@ -3819,7 +3880,12 @@ function renderCustomerOrders() {
     const itemsHtml = order.items.map(item => `
       <div class="order-product">
         <span>${item.name} x${item.quantity}</span>
-        <strong>${formatPrice(item.price * item.quantity)}</strong>
+        <strong>
+  ${formatPrice(
+    item.price * item.quantity,
+    item.productCurrency || item.originalCurrency || order.currency || "USD"
+  )}
+</strong>
       </div>
     `).join("");
 
