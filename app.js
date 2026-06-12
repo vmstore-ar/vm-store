@@ -1135,14 +1135,14 @@ function finishCartOrder() {
     return sum + item.price * item.quantity;
   }, 0);
 
-  let message = "Hola! Quiero comprar:%0A%0A";
+  let message = "Hola! Quiero comprar:\n\n";
 
-  currentCart.forEach(item => {
-    message +=
-      `• ${item.name} x${item.quantity} - USD ${item.price}%0A`;
-  });
+currentCart.forEach(item => {
+  message +=
+    `• ${item.name} x${item.quantity} - ${formatPrice(item.price, item.productCurrency || "USD")}\n`;
+});
 
-  message += `%0ATotal: USD ${total}`;
+message += `\nTotal: ${formatPrice(total, currency)}`;
 
   const customer =
     JSON.parse(localStorage.getItem("customer")) || null;
@@ -1185,10 +1185,12 @@ if (window.saveOrderToFirebase) {
 
   showToast("Pedido generado correctamente");
 
-  window.open(
-    `https://wa.me/541165937718?text=${message}`,
-    "_blank"
-  );
+ const whatsappNumber = "5491165937718";
+
+window.open(
+  `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`,
+  "_blank"
+);
 }
 
 function removeFromCart(index) {
