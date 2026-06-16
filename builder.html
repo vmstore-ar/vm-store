@@ -65,6 +65,29 @@
   </p>
 </div>
 
+<div class="shipping-mode">
+  <label>
+    <input
+      type="radio"
+      name="deliveryMethod"
+      value="pickup"
+      checked
+      onchange="calculateShipping()"
+    >
+    Retiro / coordinar
+  </label>
+
+  <label>
+    <input
+      type="radio"
+      name="deliveryMethod"
+      value="shipping"
+      onchange="calculateShipping()"
+    >
+    Envío a domicilio
+  </label>
+</div>
+
     <button
   class="checkout-btn"
   id="checkoutBtn"

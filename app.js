@@ -1135,35 +1135,53 @@ function finishCartOrder(
   paymentStatus = "Pendiente de pago"
 ) {
   const currentCart =
-  getSafeLocalStorage("cart", []);
+    getSafeLocalStorage("cart", []);
 
   if (!currentCart || currentCart.length === 0) {
     showToast("El carrito está vacío");
     return;
   }
 
+  const deliveryMethod =
+    document.querySelector('input[name="deliveryMethod"]:checked')?.value || "pickup";
+
+  const shippingZip =
+    document.getElementById("shippingZip")?.value || "";
+
   const total = currentCart.reduce((sum, item) => {
+    const itemCurrency =
+      item.productCurrency || item.originalCurrency || "USD";
 
-  const itemCurrency =
-    item.productCurrency || item.originalCurrency || "USD";
+    const itemPrice =
+      itemCurrency === "ARS"
+        ? Number(item.price) / exchangeRate
+        : Number(item.price);
 
-  const itemPrice =
-    itemCurrency === "ARS"
-      ? Number(item.price) / exchangeRate
-      : Number(item.price);
-
-  return sum + itemPrice * item.quantity;
-
-}, 0);
+    return sum + itemPrice * item.quantity;
+  }, 0);
 
   let message = "Hola! Quiero comprar:\n\n";
 
-currentCart.forEach(item => {
-  message +=
-    `• ${item.name} x${item.quantity} - ${formatPrice(item.price, item.productCurrency || "USD")}\n`;
-});
+  currentCart.forEach(item => {
+    message +=
+      `• ${item.name} x${item.quantity} - ${formatPrice(item.price, item.productCurrency || "USD")}\n`;
+  });
 
-message += `\nTotal: ${formatPrice(total, currency)}`;
+  message += `\nMétodo de entrega: ${
+    deliveryMethod === "shipping"
+      ? "Envío a domicilio"
+      : "Retiro / coordinar"
+  }`;
+
+  if (deliveryMethod === "shipping" && shippingZip) {
+    message += `\nCódigo postal: ${shippingZip}`;
+  }
+
+  if (shippingCost > 0) {
+    message += `\nEnvío estimado: ARS ${shippingCost.toLocaleString("es-AR")}`;
+  }
+
+  message += `\nTotal: ${formatPrice(total, currency)}`;
 
   const customer =
     JSON.parse(localStorage.getItem("customer")) || null;
@@ -1171,17 +1189,28 @@ message += `\nTotal: ${formatPrice(total, currency)}`;
   const order = {
     id: Date.now(),
     date: new Date().toLocaleString("es-AR"),
+
     customerName: customer ? customer.name : "Cliente sin cuenta",
     customerEmail: customer ? customer.email : "",
     customerPhone: customer ? customer.phone : "",
+
     items: [...currentCart],
     total: total,
     currency: "USD",
-displayCurrency: currency,
+    displayCurrency: currency,
+
     status: "Pendiente",
-paymentMethod: paymentMethod,
-paymentStatus: paymentStatus,
-receiptUrl: ""
+    paymentMethod: paymentMethod,
+    paymentStatus: paymentStatus,
+    receiptUrl: "",
+
+    deliveryMethod: deliveryMethod,
+    shippingZip: shippingZip,
+    shippingCost: shippingCost || 0,
+
+    shippingCompany: "",
+    trackingCode: "",
+    trackingUrl: ""
   };
 
   let orders =
@@ -1193,29 +1222,29 @@ receiptUrl: ""
   localStorage.setItem("lastOrder", JSON.stringify(order));
 
   if (customer) {
-  customer.orders = customer.orders || [];
-  customer.orders.push(order);
+    customer.orders = customer.orders || [];
+    customer.orders.push(order);
 
-  localStorage.setItem(
-    "customer",
-    JSON.stringify(customer)
-  );
+    localStorage.setItem(
+      "customer",
+      JSON.stringify(customer)
+    );
 
-  renderCustomerOrders();
-}
+    renderCustomerOrders();
+  }
 
-if (window.saveOrderToFirebase) {
-  saveOrderToFirebase(order);
-}
+  if (window.saveOrderToFirebase) {
+    saveOrderToFirebase(order);
+  }
 
   showToast("Pedido generado correctamente");
 
- const whatsappNumber = "5491165937718";
+  const whatsappNumber = "5491165937718";
 
-window.open(
-  `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`,
-  "_blank"
-);
+  window.open(
+    `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
 }
 
 function removeFromCart(index) {
@@ -4511,6 +4540,9 @@ function copyBankData(id) {
 let shippingCost = 0;
 
 function calculateShipping() {
+
+  const deliveryMethod =
+  document.querySelector('input[name="deliveryMethod"]:checked')?.value || "pickup";
   const zipInput = document.getElementById("shippingZip");
   const estimate = document.getElementById("shippingEstimate");
 
@@ -4518,6 +4550,15 @@ function calculateShipping() {
 
   const zip = zipInput.value.trim();
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  if (deliveryMethod === "pickup") {
+  shippingCost = 0;
+  estimate.innerText =
+  "✅ Retiro sin costo o entrega a coordinar.";
+
+  updateCart();
+  return;
+}
 
   if (!zip) {
     shippingCost = 0;
@@ -4541,7 +4582,7 @@ function calculateShipping() {
   }
 
   estimate.innerText =
-    `Envío estimado: ARS ${shippingCost.toLocaleString("es-AR")}`;
+  `🚚 Envío estimado: ARS ${shippingCost.toLocaleString("es-AR")}`;
 
   updateCart();
 }
