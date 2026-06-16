@@ -6766,3 +6766,31 @@ button {
 .sidebar-group {
   margin-bottom: 4px;
 }
+
+.shipping-box {
+  margin: 14px 0;
+  padding: 14px;
+  border-radius: 16px;
+  background: #111;
+  border: 1px solid #2a2a2a;
+}
+
+.shipping-box h4 {
+  margin-bottom: 10px;
+  font-size: .95rem;
+}
+
+.shipping-box input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  background: #0b0b0b;
+  color: #fff;
+}
+
+.shipping-box p {
+  margin-top: 10px;
+  color: #cbd5e1;
+  font-size: .85rem;
+}

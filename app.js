@@ -1021,17 +1021,13 @@ function updateCart() {
 
   cart.forEach((item, index) => {
     const itemCurrency =
-  item.productCurrency || "USD";
+      item.productCurrency || "USD";
 
-if(itemCurrency === "ARS") {
-
-  total += item.price * item.quantity;
-
-} else {
-
-  total += item.price * item.quantity * exchangeRate;
-
-}
+    if(itemCurrency === "ARS") {
+      total += item.price * item.quantity;
+    } else {
+      total += item.price * item.quantity * exchangeRate;
+    }
 
     cartItems.innerHTML += `
       <div class="cart-item">
@@ -1069,28 +1065,41 @@ if(itemCurrency === "ARS") {
   });
 
   const totalARS =
-  cart.reduce((sum, item) => {
+    cart.reduce((sum, item) => {
 
-    const itemCurrency =
-      item.productCurrency || "USD";
+      const itemCurrency =
+        item.productCurrency || "USD";
 
-    if(itemCurrency === "ARS") {
-      return sum + item.price * item.quantity;
+      if(itemCurrency === "ARS") {
+        return sum + item.price * item.quantity;
+      }
+
+      return sum + item.price * item.quantity * exchangeRate;
+
+    }, 0);
+
+  const finalTotalARS =
+    totalARS + shippingCost;
+
+  cartTotal.innerHTML = `
+    <span style="display:block;font-size:.85rem;color:#94a3b8;">
+      Total a pagar
+    </span>
+
+    ${
+      shippingCost > 0
+        ? `
+          <small style="display:block;color:#94a3b8;margin:4px 0;">
+            Envío estimado: ARS ${shippingCost.toLocaleString("es-AR")}
+          </small>
+        `
+        : ""
     }
 
-    return sum + item.price * item.quantity * exchangeRate;
-
-  }, 0);
-
-cartTotal.innerHTML = `
-  <span style="display:block;font-size:.85rem;color:#94a3b8;">
-    Total a pagar
-  </span>
-
-  <strong>
-    ARS ${Math.round(totalARS).toLocaleString("es-AR")}
-  </strong>
-`;
+    <strong>
+      ARS ${Math.round(finalTotalARS).toLocaleString("es-AR")}
+    </strong>
+  `;
 
   let message =
     "Hola! Quiero comprar:%0A%0A";
@@ -1100,10 +1109,14 @@ cartTotal.innerHTML = `
       `• ${item.name} x${item.quantity} - ${formatPrice(item.price, item.productCurrency || "USD")}%0A`;
   });
 
-  message += `%0ATotal: ARS ${Math.round(totalARS).toLocaleString("es-AR")}`;
+  if(shippingCost > 0) {
+    message += `%0AEnvío estimado: ARS ${shippingCost.toLocaleString("es-AR")}`;
+  }
+
+  message += `%0ATotal: ARS ${Math.round(finalTotalARS).toLocaleString("es-AR")}`;
 
   window.cartCheckoutMessage = message;
-  window.cartCheckoutTotal = total;
+  window.cartCheckoutTotal = finalTotalARS;
 
   localStorage.setItem(
     "cart",
@@ -4493,6 +4506,44 @@ function copyBankData(id) {
 
   showToast("Dato copiado");
 
+}
+
+let shippingCost = 0;
+
+function calculateShipping() {
+  const zipInput = document.getElementById("shippingZip");
+  const estimate = document.getElementById("shippingEstimate");
+
+  if (!zipInput || !estimate) return;
+
+  const zip = zipInput.value.trim();
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  if (!zip) {
+    shippingCost = 0;
+    estimate.innerText = "Ingresá tu CP para calcular el envío.";
+    updateCart();
+    return;
+  }
+
+  if (totalItems === 0) {
+    shippingCost = 0;
+    estimate.innerText = "Agregá productos al carrito.";
+    return;
+  }
+
+  if (totalItems === 1) shippingCost = 4500;
+  if (totalItems === 2) shippingCost = 5500;
+  if (totalItems >= 3) shippingCost = 6500;
+
+  if (Number(zip) >= 5000) {
+    shippingCost += 1500;
+  }
+
+  estimate.innerText =
+    `Envío estimado: ARS ${shippingCost.toLocaleString("es-AR")}`;
+
+  updateCart();
 }
 
 
