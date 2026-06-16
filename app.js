@@ -1305,11 +1305,6 @@ function openProductModal(productId) {
     selectedVariant = product.variants[0];
   }
 
-  const finalName =
-    selectedVariant
-      ? `${product.name} ${selectedVariant.storage || ""} ${selectedVariant.color || ""}`
-      : product.name;
-
   const finalPrice =
     selectedVariant
       ? selectedVariant.price
@@ -1324,7 +1319,7 @@ function openProductModal(productId) {
     product.name;
 
   document.getElementById("modalDescription").innerText =
-    product.fullDescription || product.description;
+    "";
 
   document.getElementById("modalPrice").innerHTML =
     `
@@ -1340,13 +1335,31 @@ function openProductModal(productId) {
                 margin-bottom:5px;
               "
             >
-              USD ${product.oldPrice}
+              ${formatPrice(product.oldPrice, product.productCurrency || product.originalCurrency || "USD")}
             </small>
           `
           : ""
       }
 
-      ${formatPrice(finalPrice, product.productCurrency || product.originalCurrency || "USD")}
+      <div class="modal-current-price">
+        ${formatPrice(finalPrice, product.productCurrency || product.originalCurrency || "USD")}
+      </div>
+
+      <div class="payment-methods">
+
+        <div class="payment-pill">
+          💳 Mercado Pago
+        </div>
+
+        <div class="payment-pill">
+          🏦 Transferencia ARS
+        </div>
+
+        <div class="payment-pill">
+          💵 Transferencia USD
+        </div>
+
+      </div>
     `;
 
   document.getElementById("modalImage").src =
@@ -1404,7 +1417,7 @@ function openProductModal(productId) {
         : ""
     }
 
-    <div class="modal-tabs">
+    <div class="modal-tabs clean-tabs">
 
       <button class="modal-tab active" onclick="showModalTab(event, 'descriptionTab')">
         Descripción
@@ -1414,32 +1427,24 @@ function openProductModal(productId) {
         Características
       </button>
 
-      <button class="modal-tab" onclick="showModalTab(event, 'compatibilityTab')">
-        Compatibilidad
-      </button>
-
     </div>
 
     <div class="modal-tab-content active" id="descriptionTab">
-      <p>💳 ${product.installments || "Consultar cuotas"}</p>
-      <p>📦 Stock disponible: ${product.stock || "-"}</p>
-      <p>${product.fullDescription || product.description || ""}</p>
+      <div class="product-clean-description">
+        <p>
+          ${product.fullDescription || product.description || "Producto disponible en VM STORE."}
+        </p>
+      </div>
     </div>
 
     <div class="modal-tab-content" id="specsTab">
-      ${
-        product.specs
-          ? `<ul>${product.specs.map(item => `<li>${item}</li>`).join("")}</ul>`
-          : `<p>No hay características cargadas para este producto.</p>`
-      }
-    </div>
-
-    <div class="modal-tab-content" id="compatibilityTab">
-      ${
-        product.compatibility
-          ? `<ul>${product.compatibility.map(item => `<li>${item}</li>`).join("")}</ul>`
-          : `<p>No hay compatibilidad cargada para este producto.</p>`
-      }
+      <div class="product-clean-description">
+        ${
+          product.specs && product.specs.length > 0
+            ? `<ul class="clean-list">${product.specs.map(item => `<li>${item}</li>`).join("")}</ul>`
+            : `<p>No hay características cargadas para este producto.</p>`
+        }
+      </div>
     </div>
   `;
 
@@ -1469,23 +1474,28 @@ function openProductModal(productId) {
   };
 
   const whatsappBtn =
-  document.getElementById("modalWhatsappBtn");
+    document.getElementById("modalWhatsappBtn");
 
-if(whatsappBtn){
+  if(whatsappBtn) {
 
-  const storeWhatsapp =
-    localStorage.getItem("storeWhatsapp")
-    || "541165937718";
+    const storeWhatsapp =
+      localStorage.getItem("storeWhatsapp")
+      || "541165937718";
 
-  const message =
-    encodeURIComponent(
-      `Hola! Me interesa ${product.name}`
-    );
+    const selected =
+      window.currentSelectedVariant;
 
-  whatsappBtn.href =
-    `https://wa.me/${storeWhatsapp.replace(/\D/g, "")}?text=${message}`;
+    const message =
+      encodeURIComponent(
+        selected
+          ? `Hola! Me interesa ${product.name} ${selected.storage} ${selected.color}`
+          : `Hola! Me interesa ${product.name}`
+      );
 
-}
+    whatsappBtn.href =
+      `https://wa.me/${storeWhatsapp.replace(/\D/g, "")}?text=${message}`;
+
+  }
 
   document
     .getElementById("productModal")
@@ -1930,6 +1940,142 @@ function removeTempVariant(index) {
    ADMIN PANEL
 ========================= */
 
+function generateProductSpecs(productName, category) {
+
+  const name = productName.toLowerCase();
+
+  if (name.includes("5600g")) {
+    return [
+      "6 núcleos y 12 hilos",
+      "Frecuencia hasta 4.4 GHz",
+      "Gráficos Radeon integrados",
+      "Socket AM4",
+      "Compatible con memorias DDR4"
+    ];
+  }
+
+  if (name.includes("5800g")) {
+    return [
+      "8 núcleos y 16 hilos",
+      "Frecuencia hasta 4.6 GHz",
+      "Gráficos Radeon integrados",
+      "Socket AM4",
+      "Ideal para gaming y multitarea"
+    ];
+  }
+
+  if (name.includes("3200g")) {
+    return [
+      "4 núcleos y 4 hilos",
+      "Gráficos Radeon Vega",
+      "Socket AM4",
+      "Ideal para oficina y uso diario",
+      "Compatible con memorias DDR4"
+    ];
+  }
+
+  if (category === "iphones") {
+    return [
+      "Equipo original",
+      "Face ID funcional",
+      "Compatible con iOS actual",
+      "Excelente rendimiento",
+      "Ideal para uso diario"
+    ];
+  }
+
+  if (
+    name.includes("rtx") ||
+    name.includes("rx ")
+  ) {
+    return [
+      "Placa de video dedicada",
+      "Ideal para gaming",
+      "Compatible con PCI Express",
+      "Excelente rendimiento gráfico",
+      "Lista para juegos modernos"
+    ];
+  }
+
+  if (
+    name.includes("ryzen") ||
+    name.includes("intel") ||
+    name.includes("i3") ||
+    name.includes("i5") ||
+    name.includes("i7")
+  ) {
+    return [
+      "Procesador de alto rendimiento",
+      "Ideal para multitarea",
+      "Compatible con configuraciones gamer",
+      "Excelente eficiencia",
+      "Gran rendimiento general"
+    ];
+  }
+
+  if (name.includes("ssd")) {
+    return [
+      "Almacenamiento sólido",
+      "Mayor velocidad de carga",
+      "Menor consumo energético",
+      "Sin partes mecánicas",
+      "Ideal para actualizar equipos"
+    ];
+  }
+
+  return [
+    "Producto disponible en VM STORE",
+    "Calidad verificada",
+    "Excelente rendimiento",
+    "Garantía de funcionamiento",
+    "Consultar detalles"
+  ];
+}
+
+function generateProductDescription(productName, category) {
+
+  const name = productName.toLowerCase();
+
+  if (name.includes("5600g")) {
+    return "AMD Ryzen 5 5600G con gráficos Radeon integrados. Excelente opción para oficina, estudio, multitarea y gaming ligero sin necesidad de placa de video dedicada.";
+  }
+
+  if (name.includes("5800g")) {
+    return "AMD Ryzen 7 5800G con 8 núcleos y gráficos Radeon integrados. Ideal para usuarios exigentes, multitarea avanzada y gaming.";
+  }
+
+  if (name.includes("3200g")) {
+    return "AMD Ryzen 3 3200G con gráficos Radeon Vega integrados. Excelente alternativa económica para oficina, navegación y uso diario.";
+  }
+
+  if (category === "iphones") {
+    return `${productName} original, libre para todas las compañías y listo para usar. Ideal para redes sociales, fotos, videos, trabajo y uso diario. Equipo probado antes de la entrega.`;
+  }
+
+  if (
+    name.includes("rtx") ||
+    name.includes("rx ")
+  ) {
+    return `${productName} ideal para gaming, edición y uso exigente. Excelente opción para armar o actualizar una PC gamer con buen rendimiento gráfico.`;
+  }
+
+  if (
+    name.includes("ryzen") ||
+    name.includes("intel") ||
+    name.includes("i3") ||
+    name.includes("i5") ||
+    name.includes("i7")
+  ) {
+    return `${productName} ideal para PC de oficina, estudio, multitarea y gaming según la configuración. Buena opción para armar o actualizar una computadora.`;
+  }
+
+  if (name.includes("ssd")) {
+    return `${productName} ideal para mejorar la velocidad de arranque del sistema, apertura de programas y carga general del equipo.`;
+  }
+
+  return `${productName} disponible en VM STORE. Producto verificado, listo para entregar y con asesoramiento personalizado.`;
+}
+
 function addNewProduct() {
 
   const name = document.getElementById("adminName").value;
@@ -1993,7 +2139,7 @@ const compatibleModels =
   originalPrice: price,
   originalCurrency: productCurrency,
   productCurrency: productCurrency,
-  oldPrice: price,
+  oldPrice: "",
 
   badge: condition,
   condition: condition,
@@ -2023,13 +2169,15 @@ const compatibleModels =
   subCategory: subCategory,
   compatibleModels: compatibleModels,
   description: description,
-  fullDescription: description,
+  description: description,
+fullDescription: generateProductDescription(name, category),
+specs: generateProductSpecs(name, category),
 
   price: price,
   originalPrice: price,
   originalCurrency: productCurrency,
   productCurrency: productCurrency,
-  oldPrice: price,
+  oldPrice: "",
 
   badge: condition,
   condition: condition,
@@ -4346,3 +4494,5 @@ function copyBankData(id) {
   showToast("Dato copiado");
 
 }
+
+
