@@ -428,14 +428,9 @@ function applyFilters() {
 
   const categoryFilter = document.getElementById("categoryFilter");
   const sortFilter = document.getElementById("sortFilter");
-  const minPriceInput = document.getElementById("minPrice");
-  const maxPriceInput = document.getElementById("maxPrice");
 
   const category = categoryFilter ? categoryFilter.value : "all";
   const sort = sortFilter ? sortFilter.value : "default";
-
-  const minPrice = minPriceInput ? Number(minPriceInput.value) || 0 : 0;
-  const maxPrice = maxPriceInput ? Number(maxPriceInput.value) || Infinity : Infinity;
 
   let filteredProducts = [];
 
@@ -450,7 +445,9 @@ function applyFilters() {
     });
 
   } else {
+
     filteredProducts = products[category] || [];
+
   }
 
   if(currentSubCategory && currentSubCategory !== "all") {
@@ -458,13 +455,6 @@ function applyFilters() {
       product.subCategory === currentSubCategory
     );
   }
-
-  filteredProducts = filteredProducts.filter(product => {
-    return (
-      Number(product.price) >= minPrice &&
-      Number(product.price) <= maxPrice
-    );
-  });
 
   if(sort === "low") {
     filteredProducts.sort((a, b) => Number(a.price) - Number(b.price));
@@ -2566,6 +2556,8 @@ function logoutAdmin() {
 
   localStorage.removeItem("isAdmin");
 
+  showToast("Sesión cerrada");
+
   closeAdminPanel();
 
   updateAdminVisibility();
@@ -2580,7 +2572,7 @@ renderAdminProducts();
 
   updateAdminButton();
 
-  showToast("Sesión cerrada");
+  
 
 }
 
@@ -2615,21 +2607,21 @@ function updateAdminButton() {
   const panelBtn =
     document.getElementById("openAdminPanelBtn");
 
+  if(!adminBtn) return;
+
   if(isAdmin) {
 
+    adminBtn.style.display = "inline-flex";
     adminBtn.innerText = "🚪 Salir";
-
     adminBtn.onclick = logoutAdmin;
 
     if(panelBtn) {
-      panelBtn.style.display = "inline-block";
+      panelBtn.style.display = "inline-flex";
     }
 
   } else {
 
-    adminBtn.innerText = "🔐 Admin";
-
-    adminBtn.onclick = openLoginModal;
+    adminBtn.style.display = "none";
 
     if(panelBtn) {
       panelBtn.style.display = "none";
@@ -3712,7 +3704,8 @@ if (document.getElementById("shippingCity")) {
   document.getElementById("accountHeaderBtn");
 
 if (accountHeaderBtn) {
-  accountHeaderBtn.innerText = "👤 " + customer.name;
+  accountHeaderBtn.innerText =
+  "👤 Mi cuenta";
 }
 
   fillBudgetClientData(false);
