@@ -243,15 +243,16 @@ if(resultsCount) {
       >
 
         <div
-          class="favorite-btn ${
-            favorites.includes(product.name)
-              ? "active"
-              : ""
-          }"
-          onclick="toggleFavorite(event, '${product.name}')"
-        >
-          ❤
-        </div>
+  class="favorite-btn ${
+    favorites.includes(product.name)
+      ? "active"
+      : ""
+  }"
+  data-product-name="${product.name}"
+  onclick="toggleFavorite(event, '${product.name}')"
+>
+  ${favorites.includes(product.name) ? "♥" : "♡"}
+</div>
 
         <div class="badge">
   ${product.badge}
@@ -622,15 +623,17 @@ if(resultsCount) {
         onclick="openProductModal(${product.id})"
       >
 
-        <div class="favorite-btn ${
-          favorites.includes(product.name)
-            ? "active"
-            : ""
-        }"
-        onclick="toggleFavorite(event, '${product.name}')"
-        >
-          ❤
-        </div>
+        <div
+  class="favorite-btn ${
+    favorites.includes(product.name)
+      ? "active"
+      : ""
+  }"
+  data-product-name="${product.name}"
+  onclick="toggleFavorite(event, '${product.name}')"
+>
+  ${favorites.includes(product.name) ? "♥" : "♡"}
+</div>
 
         <div class="badge">
           ${product.badge}
@@ -1667,7 +1670,10 @@ function renderFavorites() {
           <div class="price">
 
             <span>
-              ${formatPrice(product.price)}
+              ${formatPrice(
+  product.price,
+  product.productCurrency || product.originalCurrency || "USD"
+)}
             </span>
 
             <button
@@ -1704,11 +1710,27 @@ function toggleFavorite(event, productName) {
   localStorage.setItem("favorites", JSON.stringify(favorites));
 
   if (window.saveFavoritesToFirebase) {
-  saveFavoritesToFirebase(favorites);
+    saveFavoritesToFirebase(favorites);
+  }
+
+  updateFavoriteButtons();
+  renderFavorites();
 }
 
-  renderProducts(currentCategory);      // 🔥 refresca productos
-  renderFavorites();     // 🔥 refresca favoritos
+function updateFavoriteButtons() {
+  const buttons = document.querySelectorAll(".favorite-btn");
+
+  buttons.forEach(button => {
+    const productName = button.dataset.productName;
+
+    if (favorites.includes(productName)) {
+      button.classList.add("active");
+      button.innerHTML = "♥";
+    } else {
+      button.classList.remove("active");
+      button.innerHTML = "♡";
+    }
+  });
 }
 
 function showToast(message) {
@@ -3322,7 +3344,12 @@ function renderFavoritesPanel() {
 
           <strong>${product.name}</strong>
 
-          <p>${formatPrice(product.price)}</p>
+          <p>
+  ${formatPrice(
+    product.price,
+    product.productCurrency || product.originalCurrency || "USD"
+  )}
+</p>
 
           <div class="favorite-panel-actions">
 
@@ -3358,7 +3385,11 @@ function removeFavoriteFromPanel(productName) {
 
   localStorage.setItem("favorites", JSON.stringify(favorites));
 
-  renderProducts(currentCategory);
+  if (window.saveFavoritesToFirebase) {
+    saveFavoritesToFirebase(favorites);
+  }
+
+  updateFavoriteButtons();
   renderFavorites();
   renderFavoritesPanel();
 }
