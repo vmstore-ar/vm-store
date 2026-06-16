@@ -2552,31 +2552,31 @@ function loginAdmin() {
 
 function logoutAdmin() {
 
+  const wasAdmin = isAdmin;
+
   isAdmin = false;
 
   localStorage.removeItem("isAdmin");
-
-  showToast("Sesión cerrada");
 
   closeAdminPanel();
 
   updateAdminVisibility();
 
   if (document.getElementById("productsContainer")) {
-  renderProducts(currentCategory);
-}
+    renderProducts(currentCategory);
+  }
 
-renderAdminProducts();
+  renderAdminProducts();
 
   updateAdminButtons();
 
   updateAdminButton();
 
-  
+  if (wasAdmin) {
+    showToast("Sesión cerrada");
+  }
 
 }
-
-
 
 function closeAdminPanel() {
 
@@ -3861,6 +3861,10 @@ function toggleOrderDetail(button) {
 }
 
 function logoutCustomerDemo() {
+
+  const hadCustomer =
+    localStorage.getItem("customer");
+
   localStorage.removeItem("customer");
 
   document.getElementById("accountTitle").innerText =
@@ -3877,13 +3881,16 @@ function logoutCustomerDemo() {
   showAccountLogin();
 
   const accountHeaderBtn =
-  document.getElementById("accountHeaderBtn");
+    document.getElementById("accountHeaderBtn");
 
-if (accountHeaderBtn) {
-  accountHeaderBtn.innerText = "👤 Mi cuenta";
-}
+  if (accountHeaderBtn) {
+    accountHeaderBtn.innerText = "👤 Mi cuenta";
+  }
 
-  showToast("Sesión cerrada");
+  if (hadCustomer) {
+    showToast("Sesión cerrada");
+  }
+
 }
 
 function fillBudgetClientData(showMessage = true) {
