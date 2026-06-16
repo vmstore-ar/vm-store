@@ -366,18 +366,64 @@ document.getElementById("pendingOrders").innerText =
 
         <label class="admin-order-label">Estado del pedido</label>
 
-        <select
-          class="admin-order-status-select"
-          onchange="updateOrderStatus('${order.customerId}', '${order.id}', this.value)"
-        >
-          <option value="Pendiente" ${order.status === "Pendiente" ? "selected" : ""}>Pendiente</option>
-          <option value="Preparando" ${order.status === "Preparando" ? "selected" : ""}>Preparando</option>
-          <option value="Enviado" ${order.status === "Enviado" ? "selected" : ""}>Enviado</option>
-          <option value="Entregado" ${order.status === "Entregado" ? "selected" : ""}>Entregado</option>
-          <option value="Cancelado" ${order.status === "Cancelado" ? "selected" : ""}>Cancelado</option>
-        </select>
+<select
+  class="admin-order-status-select"
+  onchange="updateOrderStatus('${order.customerId}', '${order.id}', this.value)"
+>
+  <option value="Pendiente" ${order.status === "Pendiente" ? "selected" : ""}>Pendiente</option>
+  <option value="Preparando" ${order.status === "Preparando" ? "selected" : ""}>Preparando</option>
+  <option value="Enviado" ${order.status === "Enviado" ? "selected" : ""}>Enviado</option>
+  <option value="Entregado" ${order.status === "Entregado" ? "selected" : ""}>Entregado</option>
+  <option value="Cancelado" ${order.status === "Cancelado" ? "selected" : ""}>Cancelado</option>
+</select>
 
-        <div class="admin-order-detail">
+<label class="admin-order-label">
+  Empresa de envío
+</label>
+
+<input
+  type="text"
+  class="admin-order-input"
+  id="shippingCompany-${order.id}"
+  placeholder="Andreani / OCA / Correo Argentino"
+  value="${order.shippingCompany || ""}"
+>
+
+<label class="admin-order-label">
+  Código de seguimiento
+</label>
+
+<input
+  type="text"
+  class="admin-order-input"
+  id="trackingCode-${order.id}"
+  placeholder="Ej: 28475619273"
+  value="${order.trackingCode || ""}"
+>
+
+<label class="admin-order-label">
+  Link de seguimiento
+</label>
+
+<input
+  type="text"
+  class="admin-order-input"
+  id="trackingUrl-${order.id}"
+  placeholder="https://..."
+  value="${order.trackingUrl || ""}"
+>
+
+<button
+  class="save-tracking-btn"
+  onclick="updateOrderTracking(
+    '${order.customerId}',
+    '${order.id}'
+  )"
+>
+  Guardar seguimiento
+</button>
+
+<div class="admin-order-detail">
           ${itemsHtml}
         </div>
       `;

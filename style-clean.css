@@ -6855,3 +6855,66 @@ button {
   color: #94a3b8;
   line-height: 1.4;
 }
+
+.admin-order-tracking {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.admin-order-tracking-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.admin-order-input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  color: #fff;
+  transition: .2s;
+}
+
+.admin-order-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: rgba(59,130,246,.08);
+}
+
+.save-tracking-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #3b82f6
+  );
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.save-tracking-btn:hover {
+  transform: translateY(-2px);
+}
+
+.admin-order-label {
+  display: block;
+  margin-bottom: 6px;
+  margin-top: 10px;
+  font-size: .8rem;
+  color: #94a3b8;
+}
