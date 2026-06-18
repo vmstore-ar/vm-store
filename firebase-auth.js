@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  sendPasswordResetEmail,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -20,6 +21,13 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
 // PEGÁ ACÁ TU MISMA CONFIGURACIÓN DE FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyCCHPvPXi_3xh_DvgYxSpl0pRasy9HlLAg",
@@ -33,6 +41,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 window.registerCustomerFirebase = async function () {
   const name = document.getElementById("accountRegisterName").value;
@@ -76,53 +85,112 @@ window.loginCustomerFirebase = async function () {
   }
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential =
+      await signInWithEmailAndPassword(auth, email, password);
+
+    await loadCustomerFromFirebase(userCredential.user);
+
+    closeAccountModal();
+
+    if (window.updateAccountHeaderButton) {
+      updateAccountHeaderButton();
+    }
+
+    if (window.renderCustomerOrders) {
+      renderCustomerOrders();
+    }
+
     showToast("Sesión iniciada");
+
   } catch (error) {
     console.log(error);
     showToast("Email o contraseña incorrectos");
   }
 };
 
-window.logoutCustomerFirebase = async function () {
-  await signOut(auth);
-  showToast("Sesión cerrada");
+
+async function loadCustomerFromFirebase(user) {
+  if (!user) return null;
+
+  const customerRef = doc(db, "customers", user.uid);
+  const customerSnap = await getDoc(customerRef);
+
+  let customerData;
+
+  if (customerSnap.exists()) {
+    customerData = {
+      uid: user.uid,
+      orders: [],
+      favorites: [],
+      cart: [],
+      ...customerSnap.data(),
+      email: customerSnap.data().email || user.email
+    };
+  } else {
+    customerData = {
+      uid: user.uid,
+      name: user.displayName || user.email.split("@")[0],
+      email: user.email,
+      phone: "",
+      address: "",
+      city: "",
+      orders: [],
+      favorites: [],
+      cart: []
+    };
+
+    await setDoc(customerRef, customerData);
+  }
+
+  localStorage.setItem("customer", JSON.stringify(customerData));
+
+  if (customerData.orders) {
+    localStorage.setItem("orders", JSON.stringify(customerData.orders));
+  }
+
+  return customerData;
+}
+
+window.loadCustomerFromFirebase = async function() {
+  return await loadCustomerFromFirebase(auth.currentUser);
 };
 
 onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    const customerRef = doc(db, "customers", user.uid);
-    const customerSnap = await getDoc(customerRef);
+  if (!user) return;
 
-    if (customerSnap.exists()) {
-      const customer = customerSnap.data();
+  try {
+    await loadCustomerFromFirebase(user);
 
-      localStorage.setItem("customer", JSON.stringify(customer));
-
-      if (window.loadCustomerProfile) {
-        loadCustomerProfile();
-      }
-
-      if (window.fillBudgetClientData) {
-        fillBudgetClientData(false);
-      }
-
-      if (window.loadFavoritesFromFirebase) {
-  loadFavoritesFromFirebase();
-}
-
-if (window.loadCartFromFirebase) {
-  loadCartFromFirebase();
-}
+    if (window.updateAccountHeaderButton) {
+      updateAccountHeaderButton();
     }
-  } else {
-    localStorage.removeItem("customer");
 
-    if (window.logoutCustomerDemo) {
-      logoutCustomerDemo();
+    if (window.renderCustomerOrders) {
+      renderCustomerOrders();
     }
+  } catch (error) {
+    console.log("Error sincronizando cliente:", error);
   }
 });
+
+window.logoutCustomerFirebase = async function() {
+
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error(error);
+  }
+
+  localStorage.removeItem("customer");
+  localStorage.removeItem("cart");
+  localStorage.removeItem("lastOrder");
+
+  showToast("Sesión cerrada");
+
+  setTimeout(() => {
+    window.location.href = "index.html";
+  }, 800);
+};
 
 window.saveFavoritesToFirebase = async function(favoritesArray) {
   const user = auth.currentUser;
@@ -236,6 +304,12 @@ window.saveOrderToFirebase = async function(orderData) {
         orders: arrayUnion(orderData)
       }
     );
+
+    await loadCustomerFromFirebase(user);
+
+    if (window.renderCustomerOrders) {
+      renderCustomerOrders();
+    }
 
     console.log("Pedido guardado");
 
@@ -364,6 +438,17 @@ document.getElementById("pendingOrders").innerText =
         <p><strong>Pago:</strong> ${order.paymentStatus || "No pagado"}</p>
         <p><strong>Fecha:</strong> ${order.createdAt || order.date || "-"}</p>
 
+        ${order.receiptUrl
+          ? `<div class="admin-receipt-box">
+              <strong>Comprobante:</strong>
+              <a href="${order.receiptUrl}" target="_blank" rel="noopener noreferrer">
+                Ver comprobante
+              </a>
+              <span>${order.receiptName || "Archivo adjunto"}</span>
+            </div>`
+          : `<p><strong>Comprobante:</strong> Sin comprobante cargado</p>`
+        }
+
         <label class="admin-order-label">Estado del pedido</label>
 
 <select
@@ -371,6 +456,7 @@ document.getElementById("pendingOrders").innerText =
   onchange="updateOrderStatus('${order.customerId}', '${order.id}', this.value)"
 >
   <option value="Pendiente" ${order.status === "Pendiente" ? "selected" : ""}>Pendiente</option>
+  <option value="Pendiente de revisión" ${order.status === "Pendiente de revisión" ? "selected" : ""}>Pendiente de revisión</option>
   <option value="Preparando" ${order.status === "Preparando" ? "selected" : ""}>Preparando</option>
   <option value="Enviado" ${order.status === "Enviado" ? "selected" : ""}>Enviado</option>
   <option value="Entregado" ${order.status === "Entregado" ? "selected" : ""}>Entregado</option>
@@ -463,6 +549,18 @@ window.updateOrderStatus = async function(customerId, orderId, newStatus) {
     await updateDoc(customerRef, {
       orders: updatedOrders
     });
+
+    if (auth.currentUser && auth.currentUser.uid === customerId) {
+      await loadCustomerFromFirebase(auth.currentUser);
+
+      if (window.renderCustomerOrders) {
+        renderCustomerOrders();
+      }
+    }
+
+    if (window.loadAllOrdersForAdmin) {
+      loadAllOrdersForAdmin();
+    }
 
     showToast("Estado actualizado");
 
@@ -583,4 +681,93 @@ window.loadCustomersForAdmin = async function() {
 
   }
 
+};
+
+window.resetCustomerPassword = async function() {
+
+  const email =
+    document.getElementById("accountLoginEmail").value.trim();
+
+  if (!email) {
+    showToast("Ingresá tu email para recuperar la contraseña");
+    return;
+  }
+
+  try {
+
+    await sendPasswordResetEmail(auth, email);
+
+    showToast("Te enviamos un email para recuperar tu contraseña");
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast("No pudimos enviar el email de recuperación");
+
+  }
+
+};
+
+window.uploadReceiptToFirebase = async function(orderId, file) {
+  const user = auth.currentUser;
+
+  if (!user) {
+    showToast("Iniciá sesión para subir el comprobante");
+    return;
+  }
+
+  if (!file) return;
+
+  try {
+    showToast("Subiendo comprobante...");
+
+    const fileExtension = file.name.split(".").pop();
+    const storageRef = ref(
+      storage,
+      `receipts/${user.uid}/${orderId}-${Date.now()}.${fileExtension}`
+    );
+
+    await uploadBytes(storageRef, file);
+    const receiptUrl = await getDownloadURL(storageRef);
+
+    const customerRef = doc(db, "customers", user.uid);
+    const customerSnap = await getDoc(customerRef);
+
+    if (!customerSnap.exists()) {
+      showToast("Cliente no encontrado");
+      return;
+    }
+
+    const customer = customerSnap.data();
+    const updatedOrders = (customer.orders || []).map(order => {
+      if (String(order.id) === String(orderId)) {
+        return {
+          ...order,
+          receiptUrl,
+          receiptName: file.name,
+          paymentStatus: "Comprobante enviado",
+          status: order.status === "Pendiente" ? "Pendiente de revisión" : order.status
+        };
+      }
+
+      return order;
+    });
+
+    await updateDoc(customerRef, {
+      orders: updatedOrders
+    });
+
+    await loadCustomerFromFirebase(user);
+
+    if (window.renderCustomerOrders) {
+      renderCustomerOrders();
+    }
+
+    showToast("Comprobante enviado correctamente");
+
+  } catch (error) {
+    console.log("Error subiendo comprobante:", error);
+    showToast("No se pudo subir el comprobante");
+  }
 };

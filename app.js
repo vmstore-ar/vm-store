@@ -1130,7 +1130,7 @@ function updateCart() {
   initLucideIcons();
 }
 
-function finishCartOrder(
+async function finishCartOrder(
   paymentMethod = "WhatsApp",
   paymentStatus = "Pendiente de pago"
 ) {
@@ -1139,6 +1139,15 @@ function finishCartOrder(
 
   if (!currentCart || currentCart.length === 0) {
     showToast("El carrito está vacío");
+    return;
+  }
+
+  const customer =
+    JSON.parse(localStorage.getItem("customer")) || null;
+
+  if (!customer) {
+    showToast("Iniciá sesión para generar el pedido");
+    openAccountModal();
     return;
   }
 
@@ -1160,39 +1169,14 @@ function finishCartOrder(
     return sum + itemPrice * item.quantity;
   }, 0);
 
-  let message = "Hola! Quiero comprar:\n\n";
-
-  currentCart.forEach(item => {
-    message +=
-      `• ${item.name} x${item.quantity} - ${formatPrice(item.price, item.productCurrency || "USD")}\n`;
-  });
-
-  message += `\nMétodo de entrega: ${
-    deliveryMethod === "shipping"
-      ? "Envío a domicilio"
-      : "Retiro / coordinar"
-  }`;
-
-  if (deliveryMethod === "shipping" && shippingZip) {
-    message += `\nCódigo postal: ${shippingZip}`;
-  }
-
-  if (shippingCost > 0) {
-    message += `\nEnvío estimado: ARS ${shippingCost.toLocaleString("es-AR")}`;
-  }
-
-  message += `\nTotal: ${formatPrice(total, currency)}`;
-
-  const customer =
-    JSON.parse(localStorage.getItem("customer")) || null;
-
   const order = {
     id: Date.now(),
+    customerId: customer.uid || customer.id || "",
     date: new Date().toLocaleString("es-AR"),
 
-    customerName: customer ? customer.name : "Cliente sin cuenta",
-    customerEmail: customer ? customer.email : "",
-    customerPhone: customer ? customer.phone : "",
+    customerName: customer.name || "Cliente",
+    customerEmail: customer.email || "",
+    customerPhone: customer.phone || "",
 
     items: [...currentCart],
     total: total,
@@ -1213,15 +1197,20 @@ function finishCartOrder(
     trackingUrl: ""
   };
 
-  let orders =
-    JSON.parse(localStorage.getItem("orders")) || [];
+  try {
+    if (window.saveOrderToFirebase) {
+      await window.saveOrderToFirebase(order);
+    } else {
+      throw new Error("saveOrderToFirebase no está disponible");
+    }
 
-  orders.push(order);
+    let orders =
+      JSON.parse(localStorage.getItem("orders")) || [];
 
-  localStorage.setItem("orders", JSON.stringify(orders));
-  localStorage.setItem("lastOrder", JSON.stringify(order));
+    orders.push(order);
+    localStorage.setItem("orders", JSON.stringify(orders));
+    localStorage.setItem("lastOrder", JSON.stringify(order));
 
-  if (customer) {
     customer.orders = customer.orders || [];
     customer.orders.push(order);
 
@@ -1230,21 +1219,48 @@ function finishCartOrder(
       JSON.stringify(customer)
     );
 
-    renderCustomerOrders();
+    if (typeof renderCustomerOrders === "function") {
+      await renderCustomerOrders();
+    }
+
+    if (typeof window.loadAllOrdersForAdmin === "function") {
+      await window.loadAllOrdersForAdmin();
+    }
+
+    showToast("Pedido generado correctamente");
+
+    let message = "Hola! Quiero comprar:\n\n";
+
+    currentCart.forEach(item => {
+      message +=
+        `• ${item.name} x${item.quantity} - ${formatPrice(item.price, item.productCurrency || "USD")}\n`;
+    });
+
+    message += `\nMétodo de entrega: ${
+      deliveryMethod === "shipping"
+        ? "Envío a domicilio"
+        : "Retiro / coordinar"
+    }`;
+
+    if (deliveryMethod === "shipping" && shippingZip) {
+      message += `\nCódigo postal: ${shippingZip}`;
+    }
+
+    if (shippingCost > 0) {
+      message += `\nEnvío estimado: ARS ${shippingCost.toLocaleString("es-AR")}`;
+    }
+
+    message += `\nTotal: ${formatPrice(total, currency)}`;
+
+    window.open(
+      `https://api.whatsapp.com/send?phone=5491165937718&text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+
+  } catch (error) {
+    console.error("Error guardando pedido:", error);
+    showToast("No se pudo guardar el pedido en Firebase");
   }
-
-  if (window.saveOrderToFirebase) {
-    saveOrderToFirebase(order);
-  }
-
-  showToast("Pedido generado correctamente");
-
-  const whatsappNumber = "5491165937718";
-
-  window.open(
-    `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`,
-    "_blank"
-  );
 }
 
 function removeFromCart(index) {
@@ -1397,6 +1413,10 @@ function openProductModal(productId) {
   document.getElementById("modalImage").src =
     finalImage;
 
+    setTimeout(() => {
+  renderVariantGallery(selectedVariant, product);
+}, 100);
+
   document.getElementById("modalBadge").innerText =
     product.badge || "";
 
@@ -1443,6 +1463,8 @@ function openProductModal(productId) {
                 }
               </div>
             </div>
+
+            <div id="modalVariantGallery" class="variant-gallery"></div>
 
           </div>
         `
@@ -1535,6 +1557,41 @@ function openProductModal(productId) {
 
 }
 
+function renderVariantGallery(variant, product) {
+
+  const images =
+    variant && variant.images && variant.images.length > 0
+      ? variant.images
+      : variant && variant.image
+      ? [variant.image]
+      : [product.image];
+
+  document.getElementById("modalImage").src = images[0];
+
+  const galleryContainer =
+    document.getElementById("modalVariantGallery");
+
+  if(!galleryContainer) return;
+
+  galleryContainer.innerHTML = images.map((img, index) => `
+    <img
+      src="${img}"
+      class="variant-gallery-thumb ${index === 0 ? "active" : ""}"
+      onclick="changeVariantMainImage('${img}', this)"
+    >
+  `).join("");
+}
+
+function changeVariantMainImage(image, thumb) {
+
+  document.getElementById("modalImage").src = image;
+
+  document.querySelectorAll(".variant-gallery-thumb")
+    .forEach(item => item.classList.remove("active"));
+
+  thumb.classList.add("active");
+}
+
 function selectProductVariant(productId, type, value, button) {
 
   const product =
@@ -1571,11 +1628,16 @@ function selectProductVariant(productId, type, value, button) {
   document.getElementById("modalPrice").innerHTML =
     `${formatPrice(selected.price, product.productCurrency || product.originalCurrency || "USD")}`;
 
-  document.getElementById("modalImage").src =
-    selected.image || product.image;
+  renderVariantGallery(selected, product);
 
-  document.getElementById("modalDescription").innerText =
-    `${product.name} ${selected.storage} ${selected.color}`;
+  document.getElementById("modalDescription").innerHTML =
+`
+Color: ${selected.color}
+<br>
+Capacidad: ${selected.storage}
+<br>
+🔋 Batería: ${selected.battery || "-"}%
+`;
 
   const group =
     button.parentElement;
@@ -1856,14 +1918,12 @@ window.addEventListener("scroll", () => {
   const header =
     document.querySelector("header");
 
+  if (!header) return;
+
   if(window.scrollY > 40) {
-
     header.classList.add("scrolled");
-
   } else {
-
     header.classList.remove("scrolled");
-
   }
 
 });
@@ -1918,26 +1978,54 @@ function addVariantToTempList() {
   const color = document.getElementById("variantColor").value.trim();
   const storage = document.getElementById("variantStorage").value.trim();
   const price = Number(document.getElementById("variantPrice").value);
-  const image = document.getElementById("variantImage").value.trim();
+
+  const battery =
+  Number(document.getElementById("variantBattery").value);
+
+  const imageInput = document.getElementById("variantImages");
+  const files = Array.from(imageInput.files);
 
   if(!color || !storage || !price) {
     showToast("Completá color, capacidad y precio");
     return;
   }
 
-  tempVariants.push({
-    color,
-    storage,
-    price,
-    image
+  if(files.length === 0) {
+    showToast("Seleccioná al menos una imagen");
+    return;
+  }
+
+  const readers = files.map(file => {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        resolve(e.target.result);
+      };
+
+      reader.readAsDataURL(file);
+    });
   });
 
-  document.getElementById("variantColor").value = "";
-  document.getElementById("variantStorage").value = "";
-  document.getElementById("variantPrice").value = "";
-  document.getElementById("variantImage").value = "";
+  Promise.all(readers).then(images => {
 
-  renderTempVariants();
+    tempVariants.push({
+  color,
+  storage,
+  battery,
+  price,
+  image: images[0],
+  images
+});
+
+    document.getElementById("variantColor").value = "";
+    document.getElementById("variantStorage").value = "";
+    document.getElementById("variantPrice").value = "";
+    document.getElementById("variantBattery").value = "";
+    imageInput.value = "";
+
+    renderTempVariants();
+  });
 }
 
 function renderTempVariants() {
@@ -1952,7 +2040,11 @@ function renderTempVariants() {
     container.innerHTML += `
       <div class="variant-admin-item">
         <span>
-          ${variant.color} / ${variant.storage} / USD ${variant.price}
+          ${variant.color} /
+${variant.storage} /
+🔋 ${variant.battery || "-"}% / ${formatPrice(variant.price)}
+          <br>
+          <small>${variant.images ? variant.images.length : 1} fotos cargadas</small>
         </span>
 
         <button onclick="removeTempVariant(${index})">
@@ -3615,41 +3707,67 @@ window.addEventListener("scroll", () => {
   const header =
     document.querySelector("header");
 
+  if (!header) return;
+
   if(window.scrollY > 40) {
-
     header.classList.add("scrolled");
-
   } else {
-
     header.classList.remove("scrolled");
-
   }
 
 });
 
 function openAccountModal() {
-  document.getElementById("accountModal").classList.add("active");
-  renderCustomerOrders();
+
+  const customer =
+    JSON.parse(localStorage.getItem("customer")) || null;
+
+  if (customer) {
+    window.location.href = "cuenta.html";
+    return;
+  }
+
+  const modal =
+    document.getElementById("accountModal");
+
+  if (modal) {
+    modal.classList.add("active");
+  }
 }
 
 function closeAccountModal() {
-  document.getElementById("accountModal").classList.remove("active");
+  const modal = document.getElementById("accountModal");
+  if (!modal) return;
+
+  modal.classList.remove("active");
 }
 
 function showAccountLogin() {
-  document.getElementById("accountLoginForm").classList.add("active");
-  document.getElementById("accountRegisterForm").classList.remove("active");
+  const loginForm = document.getElementById("accountLoginForm");
+  const registerForm = document.getElementById("accountRegisterForm");
+  const tabs = document.querySelectorAll(".account-tab");
 
-  document.querySelectorAll(".account-tab")[0].classList.add("active");
-  document.querySelectorAll(".account-tab")[1].classList.remove("active");
+  if (!loginForm || !registerForm || tabs.length < 2) return;
+
+  loginForm.classList.add("active");
+  registerForm.classList.remove("active");
+
+  tabs[0].classList.add("active");
+  tabs[1].classList.remove("active");
 }
 
 function showAccountRegister() {
-  document.getElementById("accountRegisterForm").classList.add("active");
-  document.getElementById("accountLoginForm").classList.remove("active");
+  const loginForm = document.getElementById("accountLoginForm");
+  const registerForm = document.getElementById("accountRegisterForm");
+  const tabs = document.querySelectorAll(".account-tab");
 
-  document.querySelectorAll(".account-tab")[1].classList.add("active");
-  document.querySelectorAll(".account-tab")[0].classList.remove("active");
+  if (!loginForm || !registerForm || tabs.length < 2) return;
+
+  registerForm.classList.add("active");
+  loginForm.classList.remove("active");
+
+  tabs[1].classList.add("active");
+  tabs[0].classList.remove("active");
 }
 
 function registerCustomerDemo() {
@@ -3704,191 +3822,71 @@ function loadCustomerProfile() {
 
   if (!customer) return;
 
-  document.getElementById("accountTitle").innerText =
-    "Hola, " + customer.name;
+  const accountTitle = document.getElementById("accountTitle");
+  const accountSubtitle = document.getElementById("accountSubtitle");
+  const accountTabs = document.getElementById("accountTabs");
+  const accountLoginForm = document.getElementById("accountLoginForm");
+  const accountRegisterForm = document.getElementById("accountRegisterForm");
+  const accountProfile = document.getElementById("accountProfile");
 
-  document.getElementById("accountSubtitle").innerText =
-    "Estos son tus datos guardados en VM STORE.";
-
-  document.getElementById("accountTabs").style.display =
-    "none";
-
-  document.getElementById("accountLoginForm").classList.remove("active");
-  document.getElementById("accountRegisterForm").classList.remove("active");
-
-  document.getElementById("accountProfile").classList.add("active");
-
-  document.getElementById("profileName").innerText = customer.name;
-  document.getElementById("profileEmail").innerText = customer.email;
-  document.getElementById("profilePhone").innerText = customer.phone;
-
-  if (document.getElementById("profileAddress")) {
-  document.getElementById("profileAddress").innerText =
-    customer.address || "Sin cargar";
-}
-
-if (document.getElementById("profileCity")) {
-  document.getElementById("profileCity").innerText =
-    customer.city || "Sin cargar";
-}
-
-if (document.getElementById("shippingAddress")) {
-  document.getElementById("shippingAddress").value =
-    customer.address || "";
-}
-
-if (document.getElementById("shippingCity")) {
-  document.getElementById("shippingCity").value =
-    customer.city || "";
-}
-
-  const accountHeaderBtn =
-  document.getElementById("accountHeaderBtn");
-
-if (accountHeaderBtn) {
-  accountHeaderBtn.innerText =
-  "👤 Mi cuenta";
-}
-
-  fillBudgetClientData(false);
-
-  renderCustomerOrders();
-
-}
-
-function renderCustomerOrders() {
-
-  const customer =
-    JSON.parse(localStorage.getItem("customer"));
-
-  const ordersList =
-    document.getElementById("ordersList");
-
-  if (!ordersList) return;
-
-  if (!customer || !customer.orders || customer.orders.length === 0) {
-    ordersList.innerHTML = `
-      <p class="no-orders">
-        Todavía no hay pedidos.
-      </p>
-    `;
+  if (!accountTitle || !accountSubtitle || !accountTabs || !accountLoginForm || !accountRegisterForm || !accountProfile) {
     return;
   }
 
-  function money(value, currencyType) {
-    const number = Number(value) || 0;
+  accountTitle.innerText =
+    "Hola, " + customer.name;
 
-    const finalCurrency =
-      currencyType === "USD"
-        ? "USD"
-        : "ARS";
+  accountSubtitle.innerText =
+    "Estos son tus datos guardados en VM STORE.";
 
-    return `${finalCurrency} ${number.toLocaleString("es-AR")}`;
+  accountTabs.style.display =
+    "none";
+
+  accountLoginForm.classList.remove("active");
+  accountRegisterForm.classList.remove("active");
+
+  accountProfile.classList.add("active");
+
+  const profileName = document.getElementById("profileName");
+  const profileEmail = document.getElementById("profileEmail");
+  const profilePhone = document.getElementById("profilePhone");
+
+  if (profileName) profileName.innerText = customer.name || "";
+  if (profileEmail) profileEmail.innerText = customer.email || "";
+  if (profilePhone) profilePhone.innerText = customer.phone || "";
+
+  const profileAddress = document.getElementById("profileAddress");
+  const profileCity = document.getElementById("profileCity");
+  const shippingAddress = document.getElementById("shippingAddress");
+  const shippingCity = document.getElementById("shippingCity");
+
+  if (profileAddress) {
+    profileAddress.innerText = customer.address || "Sin cargar";
   }
 
-  ordersList.innerHTML = "";
+  if (profileCity) {
+    profileCity.innerText = customer.city || "Sin cargar";
+  }
 
-  customer.orders
-    .slice()
-    .reverse()
-    .forEach(order => {
+  if (shippingAddress) {
+    shippingAddress.value = customer.address || "";
+  }
 
-      const orderCard = document.createElement("div");
-      orderCard.className = "order-card";
+  if (shippingCity) {
+    shippingCity.value = customer.city || "";
+  }
 
-      const itemsHtml =
-        order.items.map(item => {
+  const accountHeaderBtn =
+    document.getElementById("accountHeaderBtn");
 
-          let itemCurrency =
-            item.productCurrency ||
-            item.originalCurrency ||
-            order.currency ||
-            "ARS";
+  if (accountHeaderBtn) {
+    accountHeaderBtn.innerText = "👤 Mi cuenta";
+  }
 
-          if (Number(item.price) > 1000) {
-            itemCurrency = "ARS";
-          }
-
-          return `
-            <div class="order-product">
-              <span>${item.name} x${item.quantity}</span>
-              <strong>
-                ${money(
-  itemCurrency === "ARS" && Number(item.price) > 1000000
-    ? (Number(item.price) / exchangeRate) * item.quantity
-    : Number(item.price) * item.quantity,
-  itemCurrency
-)}
-              </strong>
-            </div>
-          `;
-
-        }).join("");
-
-      let total = 0;
-      let orderCurrency = "ARS";
-
-      order.items.forEach(item => {
-        let fixedPrice = Number(item.price);
-
-if (
-  (item.productCurrency === "ARS" || item.originalCurrency === "ARS") &&
-  fixedPrice > 1000000
-) {
-  fixedPrice = fixedPrice / exchangeRate;
+  fillBudgetClientData(false);
+  renderCustomerOrders();
 }
 
-total += fixedPrice * Number(item.quantity || 1);
-
-        if (
-          item.productCurrency === "USD" ||
-          item.originalCurrency === "USD"
-        ) {
-          orderCurrency = "USD";
-        }
-      });
-
-      orderCard.innerHTML = `
-        <strong>Pedido #${order.id || "Pedido"}</strong>
-
-        <p>Fecha: ${order.date || order.createdAt || "-"}</p>
-        <p>Total: ${money(total, orderCurrency)}</p>
-
-        <p>
-          <strong>Estado:</strong>
-          <span class="order-status ${(
-            order.status || "Pendiente"
-          ).toLowerCase()}">
-            ${order.status || "Pendiente"}
-          </span>
-        </p>
-
-        <p>Pago: ${order.paymentStatus || "No pagado"}</p>
-
-       <input
-  type="file"
-  accept="image/*,.pdf"
-  onchange="handleReceiptFile(this, '${order.id}')"
->
-
-        <div class="order-detail">
-          ${itemsHtml}
-        </div>
-      `;
-
-      ordersList.appendChild(orderCard);
-
-    });
-
-    document
-  .querySelectorAll(".receipt-upload-btn")
-  .forEach(button => {
-    button.addEventListener("click", function () {
-      openReceiptUpload(this.dataset.orderId);
-    });
-  });
-
-}
 
 function toggleOrderDetail(button) {
   const detail =
@@ -4089,17 +4087,28 @@ async function saveCustomerOrder() {
   return order;
 }
 
-function renderCustomerOrders() {
-  const container =
-    document.getElementById("customerOrdersList");
-
+async function renderCustomerOrders() {
+  const container = document.getElementById("customerOrdersList");
   if (!container) return;
+
+  if (window.loadCustomerFromFirebase) {
+    try {
+      await window.loadCustomerFromFirebase();
+    } catch (error) {
+      console.log("No se pudieron actualizar los pedidos desde Firebase", error);
+    }
+  }
 
   const customer =
     JSON.parse(localStorage.getItem("customer")) || null;
 
+  const localOrders =
+    JSON.parse(localStorage.getItem("orders")) || [];
+
   const orders =
-    customer && customer.orders ? customer.orders : [];
+    customer && Array.isArray(customer.orders)
+      ? customer.orders
+      : localOrders;
 
   if (orders.length === 0) {
     container.innerHTML = `
@@ -4113,54 +4122,119 @@ function renderCustomerOrders() {
   container.innerHTML = "";
 
   orders.slice().reverse().forEach(order => {
-    const itemsHtml = order.items.map(item => `
+    const itemsHtml = (order.items || []).map(item => `
       <div class="order-product">
-        <span>${item.name} x${item.quantity}</span>
+        <span>${item.name} x${item.quantity || 1}</span>
         <strong>
-  ${formatPrice(
-    item.price * item.quantity,
-    item.productCurrency || item.originalCurrency || order.currency || "USD"
-  )}
-</strong>
+          ${formatPrice(
+            Number(item.price) * Number(item.quantity || 1),
+            item.productCurrency || item.originalCurrency || order.currency || "USD"
+          )}
+        </strong>
       </div>
     `).join("");
 
+    const finalTotalARS =
+      (order.items || []).reduce((sum, item) => {
+        const itemCurrency =
+          item.productCurrency || item.originalCurrency || "USD";
+
+        if (itemCurrency === "ARS") {
+          return sum + Number(item.price) * Number(item.quantity || 1);
+        }
+
+        return sum + Number(item.price) * Number(item.quantity || 1) * exchangeRate;
+      }, 0) + Number(order.shippingCost || 0);
+
+    const canUploadReceipt =
+      !order.receiptUrl &&
+      (order.paymentMethod || "").toLowerCase().includes("transferencia");
+
+    const receiptHtml = order.receiptUrl
+  ? `<div class="order-receipt-box">
+      <span>Comprobante:</span>
+      <a href="${order.receiptUrl}" target="_blank">Ver comprobante</a>
+    </div>`
+  : canUploadReceipt
+    ? `<button class="order-receipt-btn" onclick="sendReceiptWhatsapp('${order.id}')">
+        Enviar comprobante por WhatsApp
+      </button>`
+    : "";
+
     container.innerHTML += `
       <div class="order-card">
-        <strong>Pedido #${order.id}</strong>
 
-        <p>Fecha: ${order.createdAt || order.date || "-"}</p>
-        <p>Total: ${formatPrice(order.total)}</p>
+        <div class="order-card-header">
+          <strong>Pedido #${order.id || "Pedido"}</strong>
+          <span>${order.status || "Pendiente"}</span>
+        </div>
 
-        <p>
-          <strong>Estado:</strong>
-          <span class="order-status ${(order.status || "Pendiente").toLowerCase()}">
-            ${order.status || "Pendiente"}
-          </span>
-        </p>
+        <div class="order-info-grid">
+          <p><strong>Fecha:</strong> ${order.createdAt || order.date || "-"}</p>
+          <p><strong>Pago:</strong> ${order.paymentStatus || "No pagado"}</p>
+          <p><strong>Método:</strong> ${order.paymentMethod || "-"}</p>
+          <p>
+            <strong>Entrega:</strong>
+            ${
+              order.deliveryMethod === "shipping"
+                ? "Envío a domicilio"
+                : "Retiro / coordinar"
+            }
+          </p>
+          <p><strong>Código postal:</strong> ${order.shippingZip || "-"}</p>
+          <p><strong>Empresa:</strong> ${order.shippingCompany || "-"}</p>
+          <p><strong>Seguimiento:</strong> ${order.trackingCode || "-"}</p>
+        </div>
 
-        <p>Pago: ${order.paymentStatus || "No pagado"}</p>
+        
 
-        ${
-  (order.paymentStatus || "").toLowerCase().includes("comprobante")
-    ? `
-      <button
-  class="order-detail-btn"
-  onclick="openReceiptUpload('${order.id}')"
->
-  Subir comprobante
-</button>
-    `
-    : ""
-}
+        <div class="order-tracker">
+  <div class="order-tracker-step ${["Pendiente","Pendiente de revisión","Preparando","Enviado","Entregado"].indexOf(order.status || "Pendiente") >= 0 ? "active" : ""}">
+    <div class="order-tracker-icon">✓</div>
+    <span>Pendiente</span>
+  </div>
+
+  <div class="order-tracker-step ${["Pendiente","Pendiente de revisión","Preparando","Enviado","Entregado"].indexOf(order.status || "Pendiente") >= 1 ? "active" : ""}">
+    <div class="order-tracker-icon">✓</div>
+    <span>Revisión</span>
+  </div>
+
+  <div class="order-tracker-step ${["Pendiente","Pendiente de revisión","Preparando","Enviado","Entregado"].indexOf(order.status || "Pendiente") >= 2 ? "active" : ""}">
+    <div class="order-tracker-icon">✓</div>
+    <span>Preparando</span>
+  </div>
+
+  <div class="order-tracker-step ${["Pendiente","Pendiente de revisión","Preparando","Enviado","Entregado"].indexOf(order.status || "Pendiente") >= 3 ? "active" : ""}">
+    <div class="order-tracker-icon">✓</div>
+    <span>Enviado</span>
+  </div>
+
+  <div class="order-tracker-step ${["Pendiente","Pendiente de revisión","Preparando","Enviado","Entregado"].indexOf(order.status || "Pendiente") >= 4 ? "active" : ""}">
+    <div class="order-tracker-icon">✓</div>
+    <span>Entregado</span>
+  </div>
+</div>
 
         <div class="order-detail active">
+
           ${itemsHtml}
         </div>
+
+        ${receiptHtml}
+
+        <div class="order-total-box">
+          <span>Total final</span>
+          <strong>
+            ARS ${Number(finalTotalARS).toLocaleString("es-AR")}
+          </strong>
+        </div>
+
       </div>
     `;
   });
 }
+
+window.renderCustomerOrders = renderCustomerOrders;
 
 function setIphoneSection(category, button) {
   currentCategory = category;
@@ -4465,44 +4539,31 @@ function finishTransferOrder() {
 }
 
 function openReceiptUpload(orderId) {
-
-  console.log("Abriendo comprobante", orderId);
-alert("Abriendo selector");
-
-  const input =
-    document.createElement("input");
+  const input = document.createElement("input");
 
   input.type = "file";
   input.accept = "image/*,.pdf";
 
   input.onchange = function () {
-
-    const file = input.files[0];
-
-    if (!file) return;
-
-    showToast(
-      "Comprobante seleccionado: " +
-      file.name
-    );
-
+    handleReceiptFile(input, orderId);
   };
 
   input.click();
-
 }
 
-window.handleReceiptFile = function(input, orderId) {
+window.openReceiptUpload = openReceiptUpload;
 
+window.handleReceiptFile = async function(input, orderId) {
   const file = input.files[0];
 
   if (!file) return;
 
-  showToast("Comprobante seleccionado: " + file.name);
+  if (!window.uploadReceiptToFirebase) {
+    showToast("La subida de comprobantes todavía no está disponible");
+    return;
+  }
 
-  console.log("Pedido:", orderId);
-  console.log("Archivo:", file);
-
+  await window.uploadReceiptToFirebase(orderId, file);
 };
 
 function openBankModal(data) {
@@ -4587,4 +4648,787 @@ function calculateShipping() {
   updateCart();
 }
 
+function loadAccountPage() {
 
+  const customer =
+    JSON.parse(localStorage.getItem("customer")) || null;
+
+  if (!document.querySelector(".account-page")) return;
+
+  if (!customer) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  document.getElementById("accountPageName").innerText =
+    customer.name || "-";
+
+  document.getElementById("accountPageEmail").innerText =
+    customer.email || "-";
+
+  document.getElementById("accountPagePhone").innerText =
+    customer.phone || "-";
+
+  document.getElementById("accountPageAddress").innerText =
+    customer.address || "-";
+
+  document.getElementById("accountPageCity").innerText =
+    customer.city || "-";
+
+  renderCustomerOrders();
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  loadAccountPage();
+});
+
+function showAccountSection(section, button) {
+
+  const customer =
+  JSON.parse(localStorage.getItem("customer")) || null;
+
+if (!customer) {
+  window.location.href = "index.html";
+  return;
+}
+
+  document.querySelectorAll(".account-section")
+    .forEach(item => item.classList.remove("active"));
+
+  document.querySelectorAll(".account-menu-btn")
+    .forEach(item => item.classList.remove("active"));
+
+  document
+    .getElementById("accountSection" + section.charAt(0).toUpperCase() + section.slice(1))
+    .classList.add("active");
+
+  button.classList.add("active");
+}
+
+function updateAccountHeaderButton() {
+
+  const accountBtn =
+    document.getElementById("accountHeaderBtn");
+
+  if (!accountBtn) return;
+
+  const customer =
+    JSON.parse(localStorage.getItem("customer")) || null;
+
+  if (customer) {
+    accountBtn.innerHTML = "👤 Mi cuenta";
+  } else {
+    accountBtn.innerHTML = "👤 Ingresar";
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  updateAccountHeaderButton();
+});
+
+function generateOrderTracker(status = "Pendiente") {
+
+  const states = [
+    "Pendiente",
+    "Preparando",
+    "Enviado",
+    "Entregado"
+  ];
+
+  const normalizedStatus =
+    status === "Pendiente de revisión"
+      ? "Pendiente"
+      : status;
+
+  const currentIndex =
+    states.indexOf(normalizedStatus);
+
+  return `
+    <div class="order-tracker">
+
+      ${states.map((step, index) => `
+
+        <div class="tracker-step ${
+          index <= currentIndex
+            ? "active"
+            : ""
+        }">
+
+          <div class="tracker-circle">
+            ${index <= currentIndex ? "✓" : ""}
+          </div>
+
+          <span>${step}</span>
+
+        </div>
+
+      `).join("")}
+
+    </div>
+  `;
+}
+
+function saveOrderTracking(orderId) {
+
+  const statusInput =
+    document.getElementById(`trackingStatus-${orderId}`);
+
+  const companyInput =
+    document.getElementById(`shippingCompany-${orderId}`);
+
+  const codeInput =
+    document.getElementById(`trackingCode-${orderId}`);
+
+  const urlInput =
+    document.getElementById(`trackingUrl-${orderId}`);
+
+  let orders =
+    JSON.parse(localStorage.getItem("orders")) || [];
+
+  orders = orders.map(order => {
+    if (String(order.id) === String(orderId)) {
+      return {
+        ...order,
+        status: statusInput ? statusInput.value : order.status,
+        shippingCompany: companyInput ? companyInput.value : "",
+        trackingCode: codeInput ? codeInput.value : "",
+        trackingUrl: urlInput ? urlInput.value : ""
+      };
+    }
+
+    return order;
+  });
+
+  localStorage.setItem("orders", JSON.stringify(orders));
+
+  showToast("Seguimiento guardado");
+
+  loadAllOrdersForAdmin();
+}
+
+window.loadAllOrdersForAdmin = async function() {
+  const container = document.getElementById("adminOrdersList");
+  if (!container) return;
+
+  container.innerHTML = `<p class="empty-orders">Cargando pedidos...</p>`;
+
+  let orders = [];
+
+  try {
+    if (window.getAllOrdersFromFirebase) {
+      orders = await window.getAllOrdersFromFirebase();
+    } else {
+      orders = JSON.parse(localStorage.getItem("orders")) || [];
+    }
+  } catch (error) {
+    console.error("Error cargando pedidos:", error);
+    orders = JSON.parse(localStorage.getItem("orders")) || [];
+  }
+
+  if (!orders || orders.length === 0) {
+    container.innerHTML = `<p class="empty-orders">No hay pedidos cargados.</p>`;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  orders.slice().reverse().forEach(order => {
+    const itemsHtml = (order.items || []).map(item => `
+      <div class="admin-order-item">
+        <span>${item.name} x${item.quantity || 1}</span>
+        <strong>
+          ${formatPrice(
+            Number(item.price) * Number(item.quantity || 1),
+            item.productCurrency || item.originalCurrency || order.currency || "USD"
+          )}
+        </strong>
+      </div>
+    `).join("");
+
+    const receiptHtml = order.receiptUrl
+      ? `
+        <p>
+          <strong>Comprobante:</strong>
+          <a href="${order.receiptUrl}" target="_blank">
+            Ver comprobante
+          </a>
+        </p>
+      `
+      : `
+        <p>
+          <strong>Comprobante:</strong>
+          Sin comprobante cargado
+        </p>
+      `;
+
+    container.innerHTML += `
+      <div class="admin-order-card">
+        <h3>Pedido #${order.id}</h3>
+
+        <p><strong>Cliente:</strong> ${order.customerName || "-"}</p>
+        <p><strong>Email:</strong> ${order.customerEmail || "-"}</p>
+        <p><strong>Fecha:</strong> ${order.date || order.createdAt || "-"}</p>
+        <p><strong>Pago:</strong> ${order.paymentStatus || "No pagado"}</p>
+        <p><strong>Método:</strong> ${order.paymentMethod || "-"}</p>
+
+        ${receiptHtml}
+
+        <div class="admin-order-products">
+          ${itemsHtml}
+        </div>
+
+        <label>Estado del pedido</label>
+
+        <select id="trackingStatus-${order.id}">
+          <option value="Pendiente" ${order.status === "Pendiente" ? "selected" : ""}>Pendiente</option>
+          <option value="Preparando" ${order.status === "Preparando" ? "selected" : ""}>Preparando</option>
+          <option value="Pendiente de revisión" ${order.status === "Pendiente de revisión" ? "selected" : ""}>Pendiente de revisión</option>
+          <option value="Enviado" ${order.status === "Enviado" ? "selected" : ""}>Enviado</option>
+          <option value="Entregado" ${order.status === "Entregado" ? "selected" : ""}>Entregado</option>
+          <option value="Cancelado" ${order.status === "Cancelado" ? "selected" : ""}>Cancelado</option>
+        </select>
+
+        <input id="shippingCompany-${order.id}" type="text" placeholder="Empresa de envío" value="${order.shippingCompany || ""}">
+        <input id="trackingCode-${order.id}" type="text" placeholder="Código de seguimiento" value="${order.trackingCode || ""}">
+        <input id="trackingUrl-${order.id}" type="text" placeholder="Link de seguimiento" value="${order.trackingUrl || ""}">
+
+        <button class="btn btn-primary" onclick="saveOrderTracking('${order.id}', '${order.customerId || ""}')">
+          Guardar seguimiento
+        </button>
+      </div>
+    `;
+  });
+};
+
+window.saveOrderTracking = function(orderId) {
+  const statusInput = document.getElementById(`trackingStatus-${orderId}`);
+  const companyInput = document.getElementById(`shippingCompany-${orderId}`);
+  const codeInput = document.getElementById(`trackingCode-${orderId}`);
+  const urlInput = document.getElementById(`trackingUrl-${orderId}`);
+
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+  orders = orders.map(order => {
+    if (String(order.id) === String(orderId)) {
+      return {
+        ...order,
+        status: statusInput ? statusInput.value : order.status,
+        shippingCompany: companyInput ? companyInput.value.trim() : "",
+        trackingCode: codeInput ? codeInput.value.trim() : "",
+        trackingUrl: urlInput ? urlInput.value.trim() : ""
+      };
+    }
+
+    return order;
+  });
+
+  localStorage.setItem("orders", JSON.stringify(orders));
+
+  showToast("Seguimiento guardado");
+
+  window.loadAllOrdersForAdmin();
+};
+
+/* =========================
+   PARCHE FINAL PEDIDOS VM STORE
+========================= */
+
+async function finishCartOrder(
+  paymentMethod = "WhatsApp",
+  paymentStatus = "Pendiente de pago"
+) {
+  const currentCart = getSafeLocalStorage("cart", []);
+
+  if (!currentCart || currentCart.length === 0) {
+    showToast("El carrito está vacío");
+    return;
+  }
+
+  const customer = JSON.parse(localStorage.getItem("customer")) || null;
+
+  if (!customer) {
+    showToast("Iniciá sesión para generar el pedido");
+    openAccountModal();
+    return;
+  }
+
+  const deliveryMethod =
+    document.querySelector('input[name="deliveryMethod"]:checked')?.value || "pickup";
+
+  const shippingZip =
+    document.getElementById("shippingZip")?.value || "";
+
+  const total = currentCart.reduce((sum, item) => {
+    const itemCurrency =
+      item.productCurrency || item.originalCurrency || "USD";
+
+    const itemPrice =
+      itemCurrency === "ARS"
+        ? Number(item.price) / exchangeRate
+        : Number(item.price);
+
+    return sum + itemPrice * Number(item.quantity || 1);
+  }, 0);
+
+  const order = {
+    id: Date.now(),
+    customerId: customer.uid || customer.id || "",
+    date: new Date().toLocaleString("es-AR"),
+
+    customerName: customer.name || "Cliente",
+    customerEmail: customer.email || "",
+    customerPhone: customer.phone || "",
+
+    items: [...currentCart],
+    total,
+    currency: "USD",
+    displayCurrency: currency,
+
+    status: "Pendiente",
+    paymentMethod,
+    paymentStatus,
+    receiptUrl: "",
+
+    deliveryMethod,
+    shippingZip,
+    shippingCost: shippingCost || 0,
+
+    shippingCompany: "",
+    trackingCode: "",
+    trackingUrl: ""
+  };
+
+  try {
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+    orders.push(order);
+    localStorage.setItem("orders", JSON.stringify(orders));
+    localStorage.setItem("lastOrder", JSON.stringify(order));
+
+    customer.orders = customer.orders || [];
+    customer.orders.push(order);
+    localStorage.setItem("customer", JSON.stringify(customer));
+
+    if (window.saveOrderToFirebase) {
+      await window.saveOrderToFirebase(order);
+    }
+
+    showToast("Pedido generado correctamente");
+
+    await renderCustomerOrders();
+
+    if (window.loadAllOrdersForAdmin) {
+      await window.loadAllOrdersForAdmin();
+    }
+
+  } catch (error) {
+    console.error("Error guardando pedido:", error);
+    showToast("El pedido quedó guardado localmente, pero falló Firebase");
+  }
+}
+
+window.finishCartOrder = finishCartOrder;
+
+async function renderCustomerOrders() {
+  const container = document.getElementById("customerOrdersList");
+  if (!container) return;
+
+  const customer = JSON.parse(localStorage.getItem("customer")) || null;
+  const localOrders = JSON.parse(localStorage.getItem("orders")) || [];
+
+  let customerOrders =
+    customer && Array.isArray(customer.orders)
+      ? customer.orders
+      : [];
+
+  const allOrders = [...customerOrders, ...localOrders];
+
+  const uniqueOrders = allOrders.filter((order, index, self) =>
+    index === self.findIndex(o => String(o.id) === String(order.id))
+  );
+
+  if (uniqueOrders.length === 0) {
+    container.innerHTML = `
+      <p class="empty-orders">
+        Todavía no tenés pedidos.
+      </p>
+    `;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  uniqueOrders.slice().reverse().forEach(order => {
+    const itemsHtml = (order.items || []).map(item => `
+      <div class="order-product">
+        <span>${item.name} x${item.quantity || 1}</span>
+        <strong>
+          ${formatPrice(
+            Number(item.price) * Number(item.quantity || 1),
+            item.productCurrency || item.originalCurrency || order.currency || "USD"
+          )}
+        </strong>
+      </div>
+    `).join("");
+
+    const canUploadReceipt =
+      !order.receiptUrl &&
+      (order.paymentMethod || "").toLowerCase().includes("transferencia");
+
+    const receiptHtml = order.receiptUrl
+      ? `<div class="order-receipt-box">
+          <span>Comprobante:</span>
+          <a href="${order.receiptUrl}" target="_blank">Ver comprobante</a>
+        </div>`
+      : canUploadReceipt
+        ? `<button class="order-receipt-btn" onclick="openReceiptUpload('${order.id}')">
+            Enviar comprobante por WhatsApp
+          </button>`
+        : "";
+
+    container.innerHTML += `
+      <div class="order-card">
+        <div class="order-card-header">
+          <strong>Pedido #${order.id}</strong>
+          <span>${order.status || "Pendiente"}</span>
+        </div>
+
+        <p><strong>Fecha:</strong> ${order.date || order.createdAt || "-"}</p>
+        <p><strong>Pago:</strong> ${order.paymentStatus || "No pagado"}</p>
+        <p><strong>Método:</strong> ${order.paymentMethod || "-"}</p>
+
+        ${itemsHtml}
+        ${receiptHtml}
+      </div>
+    `;
+  });
+}
+
+window.renderCustomerOrders = renderCustomerOrders;
+
+window.loadAllOrdersForAdmin = async function() {
+  const container = document.getElementById("adminOrdersList");
+  if (!container) return;
+
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+  if (window.getAllOrdersFromFirebase) {
+    try {
+      const firebaseOrders = await window.getAllOrdersFromFirebase();
+      orders = [...orders, ...firebaseOrders];
+    } catch (error) {
+      console.error("No se pudieron traer pedidos de Firebase:", error);
+    }
+  }
+
+  orders = orders.filter((order, index, self) =>
+    index === self.findIndex(o => String(o.id) === String(order.id))
+  );
+
+  if (orders.length === 0) {
+    container.innerHTML = `<p class="empty-orders">No hay pedidos cargados.</p>`;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  orders.slice().reverse().forEach(order => {
+    const itemsHtml = (order.items || []).map(item => `
+      <div class="admin-order-item">
+        <span>${item.name} x${item.quantity || 1}</span>
+        <strong>${formatPrice(Number(item.price) * Number(item.quantity || 1), item.productCurrency || "USD")}</strong>
+      </div>
+    `).join("");
+
+    const receiptHtml = order.receiptUrl
+      ? `<p><strong>Comprobante:</strong> <a href="${order.receiptUrl}" target="_blank">Ver comprobante</a></p>`
+      : `<p><strong>Comprobante:</strong> Sin comprobante cargado</p>`;
+
+    container.innerHTML += `
+      <div class="admin-order-card">
+        <h3>Pedido #${order.id}</h3>
+
+        <p><strong>Cliente:</strong> ${order.customerName || "-"}</p>
+        <p><strong>Email:</strong> ${order.customerEmail || "-"}</p>
+        <p><strong>WhatsApp:</strong> ${order.customerPhone || "-"}</p>
+        <p><strong>Fecha:</strong> ${order.date || order.createdAt || "-"}</p>
+        <p><strong>Pago:</strong> ${order.paymentStatus || "No pagado"}</p>
+        <p><strong>Método:</strong> ${order.paymentMethod || "-"}</p>
+
+        ${receiptHtml}
+
+        <div class="admin-order-products">
+          ${itemsHtml}
+        </div>
+      </div>
+    `;
+  });
+};
+
+window.sendReceiptWhatsapp = function(orderId) {
+  const customer =
+    JSON.parse(localStorage.getItem("customer")) || {};
+
+  const message = `Hola VM STORE.
+Quiero enviar el comprobante del pedido #${orderId}
+
+Nombre: ${customer.name || ""}
+Email: ${customer.email || ""}
+
+Adjunto el comprobante en este chat.`;
+
+  window.open(
+    `https://wa.me/5491165937718?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+};
+
+window.sendReceiptWhatsapp = function(orderId) {
+  const customer =
+    JSON.parse(localStorage.getItem("customer")) || {};
+
+  const message = `Hola VM STORE.
+Quiero enviar el comprobante del pedido #${orderId}
+
+Nombre: ${customer.name || ""}
+Email: ${customer.email || ""}
+
+Adjunto el comprobante en este chat.`;
+
+  window.open(
+    `https://wa.me/5491165937718?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+};
+
+window.openReceiptUpload = function(orderId) {
+  sendReceiptWhatsapp(orderId);
+};
+
+function generateOrderTracker(status = "Pendiente") {
+  const steps = [
+    "Pendiente",
+    "Pendiente de revisión",
+    "Preparando",
+    "Enviado",
+    "Entregado"
+  ];
+
+  const currentIndex = steps.indexOf(status);
+
+  return `
+    <div class="order-tracker">
+      ${steps.map((step, index) => {
+        const isActive = index <= currentIndex;
+
+        return `
+          <div class="order-tracker-step ${isActive ? "active" : ""}">
+            <div class="order-tracker-icon">
+              ${isActive ? "✓" : index + 1}
+            </div>
+            <span>${step}</span>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+window.generateOrderTracker = generateOrderTracker;
+
+/* =========================
+   FIX FINAL VM STORE - MIS PEDIDOS
+   - Muestra tracker de estado
+   - Comprobante por WhatsApp
+   - No usa Firebase Storage
+========================= */
+
+window.sendReceiptWhatsapp = function(orderId) {
+  const customer =
+    JSON.parse(localStorage.getItem("customer")) || {};
+
+  const message = `Hola VM STORE.
+Quiero enviar el comprobante del pedido #${orderId}
+
+Nombre: ${customer.name || ""}
+Email: ${customer.email || ""}
+
+Adjunto el comprobante en este chat.`;
+
+  window.open(
+    `https://wa.me/5491165937718?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+};
+
+window.openReceiptUpload = function(orderId) {
+  window.sendReceiptWhatsapp(orderId);
+};
+
+function generateOrderTracker(status = "Pendiente") {
+  const steps = [
+    { key: "Pendiente", label: "Pedido" },
+    { key: "Pendiente de revisión", label: "Revisión" },
+    { key: "Preparando", label: "Preparando" },
+    { key: "Enviado", label: "Enviado" },
+    { key: "Entregado", label: "Entregado" }
+  ];
+
+  const normalizedStatus = status || "Pendiente";
+
+  let currentIndex = steps.findIndex(step => step.key === normalizedStatus);
+
+  if (currentIndex < 0) {
+    currentIndex = 0;
+  }
+
+  return `
+    <div class="order-tracker">
+      ${steps.map((step, index) => {
+        const isActive = index <= currentIndex;
+
+        return `
+          <div class="order-tracker-step ${isActive ? "active" : ""}">
+            <div class="order-tracker-icon">
+              ${isActive ? "✓" : index + 1}
+            </div>
+            <span>${step.label}</span>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+window.generateOrderTracker = generateOrderTracker;
+
+window.renderCustomerOrders = async function() {
+  const container = document.getElementById("customerOrdersList");
+  if (!container) return;
+
+  if (window.loadCustomerFromFirebase) {
+    try {
+      await window.loadCustomerFromFirebase();
+    } catch (error) {
+      console.log("No se pudieron actualizar los pedidos desde Firebase", error);
+    }
+  }
+
+  const customer = JSON.parse(localStorage.getItem("customer")) || null;
+  const localOrders = JSON.parse(localStorage.getItem("orders")) || [];
+
+  const customerOrders =
+    customer && Array.isArray(customer.orders)
+      ? customer.orders
+      : [];
+
+  const allOrders = [...customerOrders, ...localOrders];
+
+  const uniqueOrders = allOrders.filter((order, index, self) =>
+    index === self.findIndex(item => String(item.id) === String(order.id))
+  );
+
+  if (uniqueOrders.length === 0) {
+    container.innerHTML = `
+      <p class="empty-orders">
+        Todavía no tenés pedidos.
+      </p>
+    `;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  uniqueOrders.slice().reverse().forEach(order => {
+    const itemsHtml = (order.items || []).map(item => `
+      <div class="order-product">
+        <span>${item.name} x${item.quantity || 1}</span>
+        <strong>
+          ${formatPrice(
+            Number(item.price) * Number(item.quantity || 1),
+            item.productCurrency || item.originalCurrency || order.currency || "USD"
+          )}
+        </strong>
+      </div>
+    `).join("");
+
+    const finalTotalARS =
+      (order.items || []).reduce((sum, item) => {
+        const itemCurrency =
+          item.productCurrency || item.originalCurrency || "USD";
+
+        if (itemCurrency === "ARS") {
+          return sum + Number(item.price) * Number(item.quantity || 1);
+        }
+
+        return sum + Number(item.price) * Number(item.quantity || 1) * exchangeRate;
+      }, 0) + Number(order.shippingCost || 0);
+
+    const canSendReceipt =
+      !order.receiptUrl &&
+      (order.paymentMethod || "").toLowerCase().includes("transferencia");
+
+    const receiptHtml = order.receiptUrl
+      ? `
+        <div class="order-receipt-box">
+          <span>Comprobante:</span>
+          <a href="${order.receiptUrl}" target="_blank">Ver comprobante</a>
+        </div>
+      `
+      : canSendReceipt
+        ? `
+          <button class="order-receipt-btn" onclick="sendReceiptWhatsapp('${order.id}')">
+            Enviar comprobante por WhatsApp
+          </button>
+        `
+        : "";
+
+    container.innerHTML += `
+      <div class="order-card">
+
+        <div class="order-card-header">
+          <strong>Pedido #${order.id || "Pedido"}</strong>
+          <span>${order.status || "Pendiente"}</span>
+        </div>
+
+        <div class="order-info-grid">
+          <p><strong>Fecha:</strong> ${order.createdAt || order.date || "-"}</p>
+          <p><strong>Pago:</strong> ${order.paymentStatus || "No pagado"}</p>
+          <p><strong>Método:</strong> ${order.paymentMethod || "-"}</p>
+          <p>
+            <strong>Entrega:</strong>
+            ${
+              order.deliveryMethod === "shipping"
+                ? "Envío a domicilio"
+                : "Retiro / coordinar"
+            }
+          </p>
+          <p><strong>Código postal:</strong> ${order.shippingZip || "-"}</p>
+          <p><strong>Empresa:</strong> ${order.shippingCompany || "-"}</p>
+          <p><strong>Seguimiento:</strong> ${order.trackingCode || "-"}</p>
+        </div>
+
+        ${generateOrderTracker(order.status || "Pendiente")}
+
+        <div class="order-detail active">
+          ${itemsHtml}
+        </div>
+
+        ${receiptHtml}
+
+        <div class="order-total-box">
+          <span>Total final</span>
+          <strong>
+            ARS ${Number(finalTotalARS).toLocaleString("es-AR")}
+          </strong>
+        </div>
+
+      </div>
+    `;
+  });
+};
+
+window.addEventListener("load", () => {
+  if (document.getElementById("customerOrdersList")) {
+    window.renderCustomerOrders();
+  }
+});
