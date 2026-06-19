@@ -947,7 +947,12 @@ let cart =
 
 }
 
-function addToCartFromData(name, price, image) {
+function addToCartFromData(
+  name,
+  price,
+  image,
+  productCurrency = "USD"
+) {
 
   let allProducts = [];
 
@@ -963,10 +968,13 @@ function addToCartFromData(name, price, image) {
       ? Number(currentProduct.price)
       : Number(price);
 
-  const productCurrency =
+  const realCurrency =
     currentProduct
-      ? currentProduct.productCurrency || currentProduct.originalCurrency || "USD"
-      : "USD";
+      ? currentProduct.productCurrency ||
+        currentProduct.originalCurrency ||
+        productCurrency ||
+        "USD"
+      : productCurrency || "USD";
 
   const productImage =
     currentProduct && currentProduct.image
@@ -978,21 +986,26 @@ function addToCartFromData(name, price, image) {
     return;
   }
 
+  if(!realPrice || realPrice <= 0) {
+    showToast("El producto no tiene precio válido");
+    return;
+  }
+
   const existingProduct =
     cart.find(item => item.name === name);
 
-  if (existingProduct) {
+  if(existingProduct) {
 
     existingProduct.quantity++;
 
   } else {
 
     cart.push({
-      name,
+      name: name,
       price: realPrice,
       quantity: 1,
       image: productImage,
-      productCurrency
+      productCurrency: realCurrency
     });
 
   }
@@ -1001,9 +1014,13 @@ function addToCartFromData(name, price, image) {
 
   showToast("Producto agregado al carrito");
 
-  document
-    .getElementById("cartPanel")
-    .classList.add("active");
+  const cartPanel =
+    document.getElementById("cartPanel");
+
+  if(cartPanel) {
+    cartPanel.classList.add("active");
+  }
+
 }
 
 function updateCart() {
@@ -1503,29 +1520,52 @@ function openProductModal(productId) {
   `;
 
   window.currentModalProduct = product;
-  window.currentSelectedVariant = selectedVariant;
+window.currentSelectedVariant = selectedVariant;
+
+window.selectedVariantColor =
+  selectedVariant ? selectedVariant.color : null;
+
+window.selectedVariantStorage =
+  selectedVariant ? selectedVariant.storage : null;
 
   const addBtn =
     document.getElementById("modalAddBtn");
 
   addBtn.onclick = () => {
 
-    const selected =
-      window.currentSelectedVariant;
+  const selected =
+    window.currentSelectedVariant;
 
-    addToCartFromData(
-      selected
-        ? `${product.name} ${selected.storage} ${selected.color}`
-        : product.name,
-      selected
-        ? selected.price
-        : product.price,
-      selected && selected.image
-        ? selected.image
-        : product.image
-    );
+  const selectedName =
+    selected
+      ? `${product.name} ${selected.storage || ""} ${selected.color || ""}`.trim()
+      : product.name;
 
-  };
+  const selectedPrice =
+    selected
+      ? selected.price
+      : product.price;
+
+  const selectedImage =
+    selected && selected.images && selected.images.length > 0
+      ? selected.images[0]
+      : selected && selected.image
+      ? selected.image
+      : product.image;
+
+  const selectedCurrency =
+    product.productCurrency ||
+    product.originalCurrency ||
+    "USD";
+
+  addToCartFromData(
+    selectedName,
+    selectedPrice,
+    selectedImage,
+    selectedCurrency
+  );
+
+};
 
   const whatsappBtn =
     document.getElementById("modalWhatsappBtn");
@@ -1625,8 +1665,32 @@ function selectProductVariant(productId, type, value, button) {
 
   window.currentSelectedVariant = selected;
 
-  document.getElementById("modalPrice").innerHTML =
-    `${formatPrice(selected.price, product.productCurrency || product.originalCurrency || "USD")}`;
+  const selectedCurrency =
+  product.productCurrency ||
+  product.originalCurrency ||
+  "USD";
+
+document.getElementById("modalPrice").innerHTML = `
+  <div class="modal-current-price">
+    ${formatPrice(selected.price, selectedCurrency)}
+  </div>
+
+  <div class="payment-methods">
+
+    <div class="payment-pill">
+      💳 Mercado Pago
+    </div>
+
+    <div class="payment-pill">
+      🏦 Transferencia ARS
+    </div>
+
+    <div class="payment-pill">
+      💵 Transferencia USD
+    </div>
+
+  </div>
+`;
 
   renderVariantGallery(selected, product);
 
@@ -1934,42 +1998,123 @@ renderFavorites();
    IMAGE PREVIEW
 ========================= */
 
-window.addEventListener("DOMContentLoaded", () => {
+function getDataUrlSizeInBytes(dataUrl) {
 
-  const adminImage =
-    document.getElementById("adminImage");
+  if(!dataUrl || !dataUrl.includes(",")) {
+    return 0;
+  }
 
-  const imagePreview =
-    document.getElementById("imagePreview");
+  const base64 =
+    dataUrl.split(",")[1];
 
-  if(adminImage) {
+  return Math.ceil((base64.length * 3) / 4);
 
-    adminImage.addEventListener("change", function() {
+}
 
-      const file = this.files[0];
+function compressImageFile(
+  file,
+  maxWidth = 750,
+  quality = 0.6,
+  maxBytes = 450 * 1024
+) {
 
-      if(!file) return;
+  return new Promise(resolve => {
 
-      const reader = new FileReader();
+    if(!file || !file.type || !file.type.startsWith("image/")) {
+      resolve("");
+      return;
+    }
 
-      reader.onload = function(e) {
+    const reader = new FileReader();
 
-        selectedImage = e.target.result;
+    reader.onload = event => {
 
-        if(imagePreview) {
-          imagePreview.src = selectedImage;
-          imagePreview.style.display = "block";
+      const image = new Image();
+
+      image.onload = () => {
+
+        let currentWidth =
+          Math.min(maxWidth, image.width);
+
+        let currentQuality =
+          quality;
+
+        let finalImage = "";
+
+        for(let attempt = 0; attempt < 12; attempt++) {
+
+          const scale =
+            Math.min(1, currentWidth / image.width);
+
+          const width =
+            Math.round(image.width * scale);
+
+          const height =
+            Math.round(image.height * scale);
+
+          const canvas =
+            document.createElement("canvas");
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx =
+            canvas.getContext("2d");
+
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, width, height);
+
+          ctx.drawImage(image, 0, 0, width, height);
+
+          finalImage =
+            canvas.toDataURL("image/jpeg", currentQuality);
+
+          const finalSize =
+            getDataUrlSizeInBytes(finalImage);
+
+          console.log(
+            "Imagen comprimida:",
+            Math.round(finalSize / 1024) + "KB",
+            "Ancho:",
+            width,
+            "Calidad:",
+            currentQuality
+          );
+
+          if(finalSize <= maxBytes) {
+            resolve(finalImage);
+            return;
+          }
+
+          if(currentQuality > 0.35) {
+            currentQuality -= 0.08;
+          } else {
+            currentWidth *= 0.82;
+          }
+
         }
+
+        resolve(finalImage);
 
       };
 
-      reader.readAsDataURL(file);
+      image.onerror = () => {
+        resolve("");
+      };
 
-    });
+      image.src = event.target.result;
 
-  }
+    };
 
-});
+    reader.onerror = () => {
+      resolve("");
+    };
+
+    reader.readAsDataURL(file);
+
+  });
+
+}
 
 let tempVariants = [];
 
@@ -1996,16 +2141,13 @@ function addVariantToTempList() {
   }
 
   const readers = files.map(file => {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-
-      reader.onload = function(e) {
-        resolve(e.target.result);
-      };
-
-      reader.readAsDataURL(file);
-    });
-  });
+  return compressImageFile(
+    file,
+    550,
+    0.5,
+    250 * 1024
+  );
+});
 
   Promise.all(readers).then(images => {
 
@@ -2200,39 +2342,111 @@ function generateProductDescription(productName, category) {
   return `${productName} disponible en VM STORE. Producto verificado, listo para entregar y con asesoramiento personalizado.`;
 }
 
-function addNewProduct() {
+async function addNewProduct() {
 
-  const name = document.getElementById("adminName").value;
-  const description = document.getElementById("adminDescription").value;
-  const price = Number(document.getElementById("adminPrice").value);
+  const name =
+    document.getElementById("adminName").value.trim();
+
+  const description =
+    document.getElementById("adminDescription").value.trim();
+
+  const price =
+    Number(document.getElementById("adminPrice").value);
+
   const productCurrency =
-  document.getElementById("adminProductCurrency")
-    ? document.getElementById("adminProductCurrency").value
-    : "USD";
+    document.getElementById("adminProductCurrency")
+      ? document.getElementById("adminProductCurrency").value
+      : "USD";
 
-const condition =
-  document.getElementById("adminCondition")
-    ? document.getElementById("adminCondition").value
-    : "NUEVO";
-  const category = document.getElementById("adminCategory").value;
+  const condition =
+    document.getElementById("adminCondition")
+      ? document.getElementById("adminCondition").value
+      : "NUEVO";
+
+  const adminCategorySelect =
+    document.getElementById("adminCategory");
+
+  let category =
+    adminCategorySelect
+      ? adminCategorySelect.value
+      : "componentes";
+
+  const page =
+    window.location.pathname.split("/").pop();
+
+  const normalizedName =
+    name.toLowerCase();
+
+  const looksLikeIphone =
+    normalizedName.includes("iphone") ||
+    (
+      /\b(11|12|13|14|15|16|17)\b/.test(normalizedName) &&
+      /\b(pro|max|mini|plus|air|gb|128|256|512|1tb)\b/.test(normalizedName)
+    );
+
+  if(
+    category === "componentes" &&
+    (page === "iphones.html" || looksLikeIphone)
+  ) {
+    category = "iphones";
+
+    if(adminCategorySelect) {
+      adminCategorySelect.value = "iphones";
+    }
+  }
 
   const subCategory =
-  document.getElementById("adminSubCategory")
-    ? document.getElementById("adminSubCategory").value
-    : "";
+    document.getElementById("adminSubCategory")
+      ? document.getElementById("adminSubCategory").value
+      : "";
 
-const compatibleModelsInput =
-  document.getElementById("adminCompatibleModels")
-    ? document.getElementById("adminCompatibleModels").value
-    : "";
+  const compatibleModelsInput =
+    document.getElementById("adminCompatibleModels")
+      ? document.getElementById("adminCompatibleModels").value
+      : "";
 
-const compatibleModels =
-  compatibleModelsInput
-    ? compatibleModelsInput.split(",").map(model => model.trim())
-    : [];
-  const imageUrl = document.getElementById("adminImageUrl").value;
+  const compatibleModels =
+    compatibleModelsInput
+      ? compatibleModelsInput
+          .split(",")
+          .map(model => model.trim())
+          .filter(model => model !== "")
+      : [];
 
-  let productToSave = null;
+  const imageUrl =
+    document.getElementById("adminImageUrl").value.trim();
+
+    const adminImageInput =
+  document.getElementById("adminImage");
+
+const adminImageFile =
+  adminImageInput &&
+  adminImageInput.files &&
+  adminImageInput.files.length > 0
+    ? adminImageInput.files[0]
+    : null;
+
+if(!selectedImage && adminImageFile) {
+
+  showToast("Procesando imagen...");
+
+  selectedImage =
+    await compressImageFile(
+      adminImageFile,
+      650,
+      0.55,
+      350 * 1024
+    );
+
+  const imagePreview =
+    document.getElementById("imagePreview");
+
+  if(imagePreview && selectedImage) {
+    imagePreview.src = selectedImage;
+    imagePreview.style.display = "block";
+  }
+
+}
 
   if(!name || !description || !price) {
     showToast("Completá todos los campos");
@@ -2244,110 +2458,225 @@ const compatibleModels =
     return;
   }
 
+  if(!products[category]) {
+    products[category] = [];
+  }
+
+  let productToSave = null;
+
+  const wasEditing =
+    Boolean(editingProductId);
+
   if(editingProductId) {
 
+    let oldProduct = null;
+
     Object.keys(products).forEach(cat => {
-      products[cat] = products[cat].map(product => {
-        if(product.id === editingProductId) {
 
-          productToSave = {
-  ...product,
-  name: name,
-  description: description,
-  fullDescription: description,
-  category: category,
-  subCategory: subCategory,
-  compatibleModels: compatibleModels,
+      products[cat].forEach(product => {
 
-  price: price,
-  originalPrice: price,
-  originalCurrency: productCurrency,
-  productCurrency: productCurrency,
-  oldPrice: "",
-
-  badge: condition,
-  condition: condition,
-
-  image: selectedImage || imageUrl || product.image,
-
-  variants: tempVariants.length > 0
-    ? tempVariants
-    : product.variants || []
-};
-
-          return productToSave;
+        if(String(product.id) === String(editingProductId)) {
+          oldProduct = product;
         }
 
-        return product;
       });
+
     });
 
-    showToast("Producto actualizado");
+    if(!oldProduct) {
+      showToast("No se encontró el producto para editar");
+      return;
+    }
+
+    productToSave = {
+      ...oldProduct,
+
+      name: name,
+      category: category,
+      subCategory: subCategory,
+      compatibleModels: compatibleModels,
+
+      description: description,
+      fullDescription:
+        generateProductDescription(name, category),
+      specs:
+        generateProductSpecs(name, category),
+
+      price: price,
+      originalPrice: price,
+      originalCurrency: productCurrency,
+      productCurrency: productCurrency,
+      oldPrice: "",
+
+      badge: condition,
+      condition: condition,
+
+      image:
+        selectedImage ||
+        imageUrl ||
+        oldProduct.image,
+
+      variants:
+        tempVariants.length > 0
+          ? tempVariants
+          : oldProduct.variants || []
+    };
+
+    Object.keys(products).forEach(cat => {
+
+      products[cat] =
+        products[cat].filter(product =>
+          String(product.id) !== String(editingProductId)
+        );
+
+    });
+
+    products[category].push(productToSave);
 
   } else {
 
     productToSave = {
-  id: Date.now(),
-  name: name,
-  category: category,
-  subCategory: subCategory,
-  compatibleModels: compatibleModels,
-  description: description,
-  description: description,
-fullDescription: generateProductDescription(name, category),
-specs: generateProductSpecs(name, category),
+      id: Date.now(),
 
-  price: price,
-  originalPrice: price,
-  originalCurrency: productCurrency,
-  productCurrency: productCurrency,
-  oldPrice: "",
+      name: name,
+      category: category,
+      subCategory: subCategory,
+      compatibleModels: compatibleModels,
 
-  badge: condition,
-  condition: condition,
-  installments: "Consultar",
-  stock: 10,
-  image: selectedImage || imageUrl,
+      description: description,
+      fullDescription:
+        generateProductDescription(name, category),
+      specs:
+        generateProductSpecs(name, category),
 
-  variants: tempVariants
-};
+      price: price,
+      originalPrice: price,
+      originalCurrency: productCurrency,
+      productCurrency: productCurrency,
+      oldPrice: "",
 
-    if (!products[category]) {
-  products[category] = [];
-}
+      badge: condition,
+      condition: condition,
+
+      installments: "Consultar",
+      stock: 10,
+
+      image:
+        selectedImage ||
+        imageUrl,
+
+      variants: tempVariants
+    };
 
     products[category].push(productToSave);
 
-    showToast("Producto agregado");
   }
-
-  localStorage.setItem("products", JSON.stringify(products));
 
   if(window.saveProductToFirebase && productToSave) {
-    saveProductToFirebase(productToSave);
+
+    const result =
+      await saveProductToFirebase(productToSave);
+
+    if(result && result.success === false) {
+
+      console.error(
+        "No se pudo guardar el producto:",
+        result.error
+      );
+
+      if(!wasEditing && products[category]) {
+
+        products[category] =
+          products[category].filter(product =>
+            String(product.id) !== String(productToSave.id)
+          );
+
+      }
+
+      showToast("No se guardó. Probá con una imagen más liviana");
+      return;
+
+    }
+
+    if(result && result.firebaseId) {
+      productToSave.firebaseId = result.firebaseId;
+    }
+
   }
+
+  localStorage.setItem(
+    "products",
+    JSON.stringify(products)
+  );
 
   editingProductId = null;
   selectedImage = "";
 
   tempVariants = [];
-renderTempVariants();
+
+  if(typeof renderTempVariants === "function") {
+    renderTempVariants();
+  }
 
   document.getElementById("adminName").value = "";
   document.getElementById("adminDescription").value = "";
   document.getElementById("adminPrice").value = "";
-  document.getElementById("adminImage").value = "";
-  document.getElementById("imagePreview").style.display = "none";
-  document.getElementById("adminImageUrl").value = "";
-  document.getElementById("adminProductCurrency").value = "USD";
-document.getElementById("adminCondition").value = "NUEVO";
+
+  if(document.getElementById("adminImage")) {
+    document.getElementById("adminImage").value = "";
+  }
+
+  if(document.getElementById("imagePreview")) {
+    document.getElementById("imagePreview").style.display = "none";
+  }
+
+  if(document.getElementById("adminImageUrl")) {
+    document.getElementById("adminImageUrl").value = "";
+  }
+
+  if(document.getElementById("adminProductCurrency")) {
+    document.getElementById("adminProductCurrency").value = "USD";
+  }
+
+  if(document.getElementById("adminCondition")) {
+    document.getElementById("adminCondition").value = "NUEVO";
+  }
+
+  if(adminCategorySelect && page === "iphones.html") {
+    adminCategorySelect.value = "iphones";
+  }
 
   document.getElementById("adminSubmitBtn").innerText =
     "Agregar Producto";
 
-  renderProducts(currentCategory);
+  if(page === "tienda.html") {
+
+    applyFilters();
+
+  } else if(page === "iphones.html") {
+
+    currentCategory =
+      category === "accesorios-apple"
+        ? "accesorios-apple"
+        : "iphones";
+
+    renderProducts(currentCategory);
+
+  } else {
+
+    renderProducts(category);
+
+  }
+
   renderAdminProducts();
   renderFavorites();
+
+  showToast(
+    wasEditing
+      ? "Producto actualizado"
+      : "Producto agregado"
+  );
+
 }
 
   /* =========================

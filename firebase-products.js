@@ -28,27 +28,52 @@ window.saveProductToFirebase = async function(product) {
 
     const productToSave = {
       ...product,
-      productCurrency: product.productCurrency || product.originalCurrency || "USD",
-      originalCurrency: product.originalCurrency || product.productCurrency || "USD"
+      productCurrency:
+        product.productCurrency ||
+        product.originalCurrency ||
+        "USD",
+      originalCurrency:
+        product.originalCurrency ||
+        product.productCurrency ||
+        "USD"
     };
 
-    if (product.firebaseId) {
+    let firebaseId = product.firebaseId || null;
+
+    if(firebaseId) {
+
       await setDoc(
-        doc(db, "products", product.firebaseId),
-        productToSave
+        doc(db, "products", firebaseId),
+        productToSave,
+        { merge: true }
       );
+
     } else {
-      await addDoc(
+
+      const docRef = await addDoc(
         collection(db, "products"),
         productToSave
       );
+
+      firebaseId = docRef.id;
+
     }
 
-    console.log("Producto guardado en Firebase");
+    console.log("Producto guardado en Firebase:", firebaseId);
+
+    return {
+      success: true,
+      firebaseId: firebaseId
+    };
 
   } catch(error) {
 
     console.error("Error guardando producto en Firebase:", error);
+
+    return {
+      success: false,
+      error: error
+    };
 
   }
 

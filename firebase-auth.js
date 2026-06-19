@@ -570,6 +570,73 @@ window.updateOrderStatus = async function(customerId, orderId, newStatus) {
   }
 };
 
+window.updateOrderTracking = async function(customerId, orderId) {
+  if (!customerId || !orderId) {
+    showToast("Faltan datos del pedido");
+    return;
+  }
+
+  const statusInput =
+    document.getElementById(`trackingStatus-${orderId}`);
+
+  const companyInput =
+    document.getElementById(`shippingCompany-${orderId}`);
+
+  const codeInput =
+    document.getElementById(`trackingCode-${orderId}`);
+
+  const urlInput =
+    document.getElementById(`trackingUrl-${orderId}`);
+
+  try {
+    const customerRef = doc(db, "customers", customerId);
+    const customerSnap = await getDoc(customerRef);
+
+    if (!customerSnap.exists()) {
+      showToast("Cliente no encontrado");
+      return;
+    }
+
+    const customer = customerSnap.data();
+
+    const updatedOrders = (customer.orders || []).map(order => {
+      if (String(order.id) === String(orderId)) {
+        return {
+          ...order,
+          status: statusInput ? statusInput.value : (order.status || "Pendiente"),
+          shippingCompany: companyInput ? companyInput.value.trim() : (order.shippingCompany || ""),
+          trackingCode: codeInput ? codeInput.value.trim() : (order.trackingCode || ""),
+          trackingUrl: urlInput ? urlInput.value.trim() : (order.trackingUrl || "")
+        };
+      }
+
+      return order;
+    });
+
+    await updateDoc(customerRef, {
+      orders: updatedOrders
+    });
+
+    if (auth.currentUser && auth.currentUser.uid === customerId) {
+      await loadCustomerFromFirebase(auth.currentUser);
+
+      if (window.renderCustomerOrders) {
+        await renderCustomerOrders();
+      }
+    }
+
+    if (window.loadAllOrdersForAdmin) {
+      await loadAllOrdersForAdmin();
+    }
+
+    showToast("Seguimiento guardado");
+
+  } catch (error) {
+    console.log("Error guardando seguimiento:", error);
+    showToast("No se pudo guardar el seguimiento");
+  }
+};
+
 window.addEventListener("load", () => {
 
   const input =

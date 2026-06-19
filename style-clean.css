@@ -7361,3 +7361,30 @@ button {
   background: #22c55e;
   color: #000;
 }
+
+.forgot-password-btn {
+  display: block !important;
+  width: 100%;
+  margin-top: 12px;
+  color: #38bdf8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.forgot-password-btn {
+  display: block !important;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  background: transparent !important;
+  border: none !important;
+  color: #38bdf8 !important;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+
+.forgot-password-btn:hover {
+  text-decoration: underline;
+}
