@@ -1,5 +1,80 @@
 let selectedImage = "";
 
+const fallbackProductImage = "imagenes/logo.png";
+
+const brokenDemoImages = [
+  "imagenes/iphone14.jpg",
+  "imagenes/iphone15.jpg",
+  "imagenes/iphone13.jpg",
+  "imagenes/iphone16-pink.png",
+  "imagenes/rtx4060.jpg",
+  "imagenes/ryzen7.jpg",
+  "imagenes/notebook.jpg",
+  "imagenes/macbook.jpg"
+];
+
+function cleanBrokenProductImages() {
+
+  if(!products) return;
+
+  let changed = false;
+
+  Object.keys(products).forEach(category => {
+
+    products[category].forEach(product => {
+
+      if(
+        product.image &&
+        brokenDemoImages.includes(product.image)
+      ) {
+        product.image = fallbackProductImage;
+        changed = true;
+      }
+
+      if(product.variants && product.variants.length > 0) {
+
+        product.variants.forEach(variant => {
+
+          if(
+            variant.image &&
+            brokenDemoImages.includes(variant.image)
+          ) {
+            variant.image = fallbackProductImage;
+            changed = true;
+          }
+
+          if(variant.images && variant.images.length > 0) {
+
+            variant.images = variant.images.map(img => {
+
+              if(brokenDemoImages.includes(img)) {
+                changed = true;
+                return fallbackProductImage;
+              }
+
+              return img;
+
+            });
+
+          }
+
+        });
+
+      }
+
+    });
+
+  });
+
+  if(changed) {
+    localStorage.setItem(
+      "products",
+      JSON.stringify(products)
+    );
+  }
+
+}
+
 let currentSubCategory = "all";
 
 function getSafeLocalStorage(key, fallback) {
@@ -55,7 +130,7 @@ let products =
       installments: "12 cuotas",
       stock: 5,
       badge: "DESTACADO",
-      image: "imagenes/iphone15.jpg"
+      image: "imagenes/logo.png"
     },
 
     {
@@ -70,7 +145,7 @@ let products =
       installments: "9 cuotas",
       stock: 10,
       badge: "OFERTA",
-      image: "imagenes/iphone14.jpg"
+      image: "imagenes/logo.png"
     },
 
     {
@@ -85,7 +160,7 @@ let products =
       installments: "6 cuotas",
       stock: 10,
       badge: "HOT",
-      image: "imagenes/iphone13.jpg"
+      image: "imagenes/logo.png"
     }
 
   ],
@@ -208,6 +283,8 @@ perifericos: [],
 "accesorios-apple": [],
 
 });
+
+cleanBrokenProductImages();
 
 function renderProducts(category = "iphones") {
 
