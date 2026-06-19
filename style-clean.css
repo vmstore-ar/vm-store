@@ -7388,3 +7388,478 @@ button {
 .forgot-password-btn:hover {
   text-decoration: underline;
 }
+
+/* =========================
+   PRODUCT DETAIL PREMIUM
+========================= */
+
+.product-modal,
+.modal-product,
+.product-detail-modal {
+  border-radius: 24px;
+}
+
+.product-modal-content,
+.modal-product-content,
+.product-detail-content {
+  background: linear-gradient(180deg, #111827, #050505);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.product-modal-grid,
+.modal-product-grid,
+.product-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+#modalImage,
+.modal-product-image,
+.product-detail-image {
+  width: 100%;
+  max-height: 440px;
+  object-fit: contain;
+  background: radial-gradient(circle at center, #1f2937, #050505 70%);
+  border-radius: 22px;
+  padding: 22px;
+}
+
+#modalTitle {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+#modalDescription {
+  color: #cbd5e1;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+#modalPrice {
+  margin: 18px 0;
+}
+
+.modal-current-price {
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.payment-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.payment-pill {
+  font-size: 12px;
+  font-weight: 700;
+  color: #dbeafe;
+  background: rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  padding: 8px 11px;
+  border-radius: 999px;
+}
+
+.variant-group,
+.product-variants,
+.modal-variants {
+  margin: 18px 0;
+}
+
+.variant-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #e5e7eb;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.variant-btn,
+.storage-btn,
+.color-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f8fafc;
+  padding: 9px 13px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.variant-btn:hover,
+.storage-btn:hover,
+.color-btn:hover {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+.variant-btn.active,
+.storage-btn.active,
+.color-btn.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+#addToCartBtn,
+.modal-add-cart,
+.product-add-cart {
+  width: 100%;
+  margin-top: 18px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  padding: 15px 18px;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+  transition: 0.2s ease;
+}
+
+#addToCartBtn:hover,
+.modal-add-cart:hover,
+.product-add-cart:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 38px rgba(37, 99, 235, 0.45);
+}
+
+.product-specs,
+.modal-specs,
+#modalSpecs {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.product-specs li,
+.modal-specs li,
+#modalSpecs li {
+  color: #d1d5db;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+
+  .product-modal-grid,
+  .modal-product-grid,
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  #modalImage,
+  .modal-product-image,
+  .product-detail-image {
+    max-height: 310px;
+    padding: 16px;
+  }
+
+  #modalTitle {
+    font-size: 24px;
+  }
+
+  .modal-current-price {
+    font-size: 28px;
+  }
+
+  .payment-methods {
+    gap: 6px;
+  }
+
+  .payment-pill {
+    font-size: 11px;
+    padding: 7px 9px;
+  }
+
+}
+
+/* =========================
+   PRODUCT CARD IMAGE FIX
+========================= */
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card img {
+  height: 260px !important;
+  width: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 8px !important;
+  background: #f8fafc !important;
+  transform: scale(1.03);
+}
+
+.product-card:hover img {
+  transform: scale(1.24);
+}
+
+.product-info {
+  position: relative;
+  z-index: 4;
+}
+
+/* =========================
+   PRODUCT CARD CLEAN HEADER
+========================= */
+
+.product-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Imagen limpia */
+.product-card img {
+  position: relative;
+  z-index: 1;
+}
+
+/* Badge SEMINUEVO / NUEVO: lo bajamos a la info, no encima del iPhone */
+.product-card .product-badge,
+.product-card .badge,
+.product-card .condition-badge {
+  position: static !important;
+  display: inline-flex !important;
+  width: fit-content !important;
+
+  margin: 0 0 10px 0 !important;
+
+  background: rgba(34, 197, 94, 0.12) !important;
+  color: #22c55e !important;
+
+  border: 1px solid rgba(34, 197, 94, 0.35) !important;
+  border-radius: 999px !important;
+
+  padding: 5px 10px !important;
+
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1.4px !important;
+  text-transform: uppercase !important;
+
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Hacemos que la info tenga espacio prolijo */
+.product-info {
+  position: relative;
+  z-index: 4;
+  padding-top: 14px !important;
+}
+
+/* Botones admin/favorito: más chicos y menos invasivos */
+.product-card button[onclick*="editProduct"],
+.product-card button[onclick*="deleteProduct"],
+.product-card button[onclick*="toggleFavorite"] {
+  position: absolute !important;
+  top: 12px !important;
+  z-index: 10 !important;
+
+  width: 28px !important;
+  height: 28px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 50% !important;
+  border: none !important;
+  padding: 0 !important;
+
+  font-size: 12px !important;
+
+  opacity: 0.78;
+  backdrop-filter: blur(8px);
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
+}
+
+/* Posiciones */
+.product-card button[onclick*="editProduct"] {
+  right: 78px !important;
+  background: rgba(15, 23, 42, 0.75) !important;
+  color: #ffffff !important;
+}
+
+.product-card button[onclick*="deleteProduct"] {
+  right: 45px !important;
+  background: rgba(220, 38, 38, 0.82) !important;
+  color: #ffffff !important;
+}
+
+.product-card button[onclick*="toggleFavorite"] {
+  right: 12px !important;
+  background: rgba(15, 23, 42, 0.72) !important;
+  color: #ffffff !important;
+}
+
+/* En PC aparecen mejor al pasar el mouse */
+.product-card:hover button[onclick*="editProduct"],
+.product-card:hover button[onclick*="deleteProduct"],
+.product-card:hover button[onclick*="toggleFavorite"] {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* En celular que no tapen tanto */
+@media (max-width: 768px) {
+
+  .product-card button[onclick*="editProduct"],
+  .product-card button[onclick*="deleteProduct"],
+  .product-card button[onclick*="toggleFavorite"] {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 11px !important;
+    opacity: 0.65;
+  }
+
+  .product-card button[onclick*="editProduct"] {
+    right: 70px !important;
+  }
+
+  .product-card button[onclick*="deleteProduct"] {
+    right: 41px !important;
+  }
+
+}
+
+/* Badge: SEMINUEVO / NUEVO */
+.product-card .product-badge,
+.product-card .badge,
+.product-card .condition-badge {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  z-index: 8 !important;
+
+  background: rgba(17, 24, 39, 0.88) !important;
+  color: #ffffff !important;
+
+  padding: 7px 13px !important;
+  border-radius: 999px !important;
+
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Botones editar / borrar / favorito */
+.product-card button[onclick*="editProduct"],
+.product-card button[onclick*="deleteProduct"],
+.product-card button[onclick*="toggleFavorite"] {
+  position: absolute !important;
+  top: 12px !important;
+  z-index: 9 !important;
+
+  width: 32px !important;
+  height: 32px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 50% !important;
+  border: none !important;
+
+  font-size: 13px !important;
+  padding: 0 !important;
+
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+
+  transition: 0.2s ease;
+}
+
+/* Ubicación individual */
+.product-card button[onclick*="editProduct"] {
+  right: 86px !important;
+  background: rgba(71, 85, 105, 0.88) !important;
+  color: #ffffff !important;
+}
+
+.product-card button[onclick*="deleteProduct"] {
+  right: 49px !important;
+  background: rgba(239, 68, 68, 0.9) !important;
+  color: #ffffff !important;
+}
+
+.product-card button[onclick*="toggleFavorite"] {
+  right: 12px !important;
+  background: rgba(31, 41, 55, 0.82) !important;
+  color: #ffffff !important;
+}
+
+/* Hover */
+.product-card button[onclick*="editProduct"]:hover,
+.product-card button[onclick*="deleteProduct"]:hover,
+.product-card button[onclick*="toggleFavorite"]:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* Para que la imagen no quede tapada visualmente arriba */
+.product-card img {
+  padding-top: 18px !important;
+}
+
+/* =========================
+   PRODUCT CARD IMAGE NO OVERLAP
+========================= */
+
+.product-card {
+  overflow: hidden !important;
+}
+
+/* Imagen fija, sin agrandarse sobre el texto */
+.product-card img {
+  height: 245px !important;
+  width: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 8px !important;
+  background: #f8fafc !important;
+
+  transform: none !important;
+  transition: none !important;
+
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Anula el zoom al pasar el mouse */
+.product-card:hover img {
+  transform: none !important;
+}
+
+/* La info queda siempre por encima y separada */
+.product-info {
+  position: relative !important;
+  z-index: 5 !important;
+  background: #111111 !important;
+  padding-top: 14px !important;
+}
